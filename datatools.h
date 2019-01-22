@@ -8,8 +8,8 @@
 
 void init_data (int m, 		/* number of rows               */
                 int n, 		/* number of columns            */
-		double **A, 	/* two-dim array of size m-by-n */
-		double **B  	/* two-dim array of size m-by-n */
+		double *A, 	/* two-dim array of size m-by-n */
+		double *B  	/* two-dim array of size m-by-n */
                );
 
 void init_M (int m, int n, double **A);
