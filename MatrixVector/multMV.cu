@@ -1,5 +1,7 @@
 #include <stdio.h>
 __global__ void multMV(int m, int n, double *A, double *B, double *C) {
+   printf("Hello world 1! I'm thread %d out of %d in block %d. My global thread id is %d out of %d. C[%d] = %f)\n"
+         , threadIdx.x, blockDim.x, blockIdx.x, blockIdx.x * blockDim.x + threadIdx.x, blockDim.x*gridDim.x, i, C[i]);
     int i,j;
    i = blockIdx.x * blockDim.x + threadIdx.x;
    if (i >= m) return;
@@ -10,8 +12,8 @@ __global__ void multMV(int m, int n, double *A, double *B, double *C) {
          sum += A[i*n+j]*B[j];
       }
       C[i] = sum;
-      //printf("Hello world! I'm thread %d out of %d in block %d. My global thread id is %d out of %d. C[%d] = %f)\n"
-      //      , threadIdx.x, blockDim.x, blockIdx.x, blockIdx.x * blockDim.x + threadIdx.x, blockDim.x*gridDim.x, i, C[i]);
+      printf("Hello world 2! I'm thread %d out of %d in block %d. My global thread id is %d out of %d. C[%d] = %f)\n"
+            , threadIdx.x, blockDim.x, blockIdx.x, blockIdx.x * blockDim.x + threadIdx.x, blockDim.x*gridDim.x, i, C[i]);
    //}
 }
 
