@@ -7,14 +7,13 @@
 #include <stdlib.h>
 
 // Using single indexed arrays
-void init_data(int m, int n, double *A, double *B) {
+void init_matrix(int m, int n, double *A, double value) {
 
   int i, j;
 
   for (i = 0; i < m; i++)
     for (j = 0; j < n; j++) {
-      A[i * n + j] = 1.0;
-      B[i * n + j] = 2.0;
+      A[i * n + j] = value;
     }
 }
 
