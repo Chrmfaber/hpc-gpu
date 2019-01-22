@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <cstdlib>
 #include <cstdio>
+#include <datatools.h>
 
 //RUN: nvcc matmult_CUBLAS.cu -cublas -lcurand -o hello
 
@@ -31,15 +32,15 @@ void gpu_blas_mmul(const float *A, const float *B, float *C, const int m, const 
    }
 
 // Fill the array A(nr_rows_A, nr_cols_A) with random numbers on GPU
-void GPU_fill_rand(float *A, int nr_rows_A, int nr_cols_A) {
+//void GPU_fill_rand(float *A, int nr_rows_A, int nr_cols_A) {
 // Create a pseudo-random number generator
-curandGenerator_t prng;
-curandCreateGenerator(&prng, CURAND_RNG_PSEUDO_DEFAULT);
+//curandGenerator_t prng;
+//curandCreateGenerator(&prng, CURAND_RNG_PSEUDO_DEFAULT);
 // Set the seed for the random number generator using the system clock
-curandSetPseudoRandomGeneratorSeed(prng, (unsigned long long) clock());
+//curandSetPseudoRandomGeneratorSeed(prng, (unsigned long long) clock());
 // Fill the array with random numbers on the device
-curandGenerateUniform(prsng, A, nr_rows_A * nr_cols_A);
-}
+//curandGenerateUniform(prsng, A, nr_rows_A * nr_cols_A);
+//}
 
    int main() {
      // Allocate 3 arrays on CPU
@@ -58,9 +59,11 @@ curandGenerateUniform(prsng, A, nr_rows_A * nr_cols_A);
      cudaMalloc(&d_B,nr_rows_B * nr_cols_B * sizeof(float));
      cudaMalloc(&d_C,nr_rows_C * nr_cols_C * sizeof(float));
 
+     init_data(nr_rows_A,nr_cols_A,d_A,d_B);
+
      // Fill the arrays A and B on GPU with random numbers
-     GPU_fill_rand(d_A, nr_rows_A, nr_cols_A);
-     GPU_fill_rand(d_B, nr_rows_B, nr_cols_B);
+     //GPU_fill_rand(d_A, nr_rows_A, nr_cols_A);
+     //GPU_fill_rand(d_B, nr_rows_B, nr_cols_B);
 
      // Multiply A and B on GPU
      gpu_blas_mmul(d_A, d_B, d_C, nr_rows_A, nr_cols_A, nr_cols_B);
@@ -77,5 +80,6 @@ curandGenerateUniform(prsng, A, nr_rows_A * nr_cols_A);
      free(h_A);
      free(h_B);
      free(h_C);
+
      return 0;
  }
