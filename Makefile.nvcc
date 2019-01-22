@@ -1,4 +1,4 @@
-TARGET	= madd
+TARGET = matadd
 OBJS	= main.o datatools.o matadd.o multMV.o
 
 OPT	= -g -O3
@@ -7,16 +7,22 @@ PARA	= -fopenmp
 
 XOPTS = -Xptxas=-v -arch=sm_70 -lineinfo
 
+PNGWRITERPATH = pngwriter
+ARCH	      = $(shell uname -p)
+PNGWRTLPATH   = $(PNGWRITERPATH)/lib/$(ARCH)
+PNGWRTIPATH   = $(PNGWRITERPATH)/include
+PNGWRITERLIB  = $(PNGWRTLPATH)/libpngwriter.a
+
 CC	= gcc
 
 CCC	= nvcc
 CXX	= nvcc
-CXXFLAGS= --compiler-options "$(OPT) $(PARA)" $(XOPTS)
+CXXFLAGS= --compiler-options "$(OPT) $(PARA)" $(XOPTS) -I $(PNGWRTIPATH)
 
 CFLAGS	= $(OPT) $(ISA) $(PARA) $(XOPT)
 
 F90C  	= gfortran
-LIBS	=
+LIBS	= -L $(PNGWRTLPATH) -lpngwriter -lpng
 
 CUDA_PATH ?= /appl/cuda/10.0
 INCLUDES = -I$(CUDA_PATH)/include -I$(CUDA_PATH)/samples/common/inc
@@ -47,4 +53,4 @@ realclean: clean
 main.o  : main.cu matadd.h multMV.h datatools.h
 multMV.o: multMV.cu
 matadd.o: matadd.c
-datatools.o: datatools.cu
+datatools.o: datatools.c
