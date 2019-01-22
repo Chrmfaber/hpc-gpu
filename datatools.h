@@ -11,6 +11,10 @@ void init_data (int m, 		/* number of rows               */
 		double *B  	/* two-dim array of size m-by-n */
                );
 
+void print_matrix (int m,
+		   int n,
+		   double *A);
+
 void init_M (int m, int n, double **A);
 
 void init_vector (int m, double *V);

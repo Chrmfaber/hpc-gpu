@@ -18,7 +18,7 @@ void init_data(int m, int n, double *A, double *B) {
     }
 }
 
-void print_matrix(int m, int n, double **A) {
+void print_matrix(int m, int n, double *A) {
   int i, j;
   printf("----------------------------------\n");
   for (i = 0; i < m; i++) {

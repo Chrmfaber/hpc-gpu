@@ -11,8 +11,8 @@
 
 int main(int argc, char *argv[]) {
 
-  int n = 32;
-  int m = 32;
+  int n = 10;
+  int m = 10;
 
   double tcpu1;
 
@@ -48,9 +48,12 @@ int main(int argc, char *argv[]) {
   // Initalize A with 1s and B with 2s
   init_data(m, n, A, B);
 
+  print_matrix(m, n, A);
+  print_matrix(m, n, B);
+
   // Copy to device
   cudaMemcpy(d_A, A, size, cudaMemcpyHostToDevice);
-  cudaMemcpy(d_A, B, size, cudaMemcpyHostToDevice);
+  cudaMemcpy(d_B, B, size, cudaMemcpyHostToDevice);
 
   if (A == NULL || B == NULL || C == NULL) {
     fprintf(stderr, "memory allocation failed!\n");
