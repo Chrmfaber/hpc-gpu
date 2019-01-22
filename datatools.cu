@@ -18,6 +18,18 @@ void init_data(int m, int n, double *A, double *B) {
     }
 }
 
+void print_matrix(int m, int n, double **A) {
+  int i, j;
+  printf("----------------------------------\n");
+  for (i = 0; i < m; i++) {
+    for (j = 0; j < n; j++) {
+      printf("%6.2f, ", A[i * m + j]);
+    }
+    printf("\n");
+  }
+  printf("----------------------------------\n");
+}
+
 void init_vector(int m, double *V) {
   int i;
 
