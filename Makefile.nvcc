@@ -1,5 +1,7 @@
-TARGET	= madd
-OBJS	= main.o datatools.o matadd.o multMV.o
+
+TARGET	= matmat
+OBJS	= main.o datatools.o matmatgpu.o 
+
 
 OPT	= -g -O3
 ISA	=
@@ -37,14 +39,13 @@ clean:
 	@/bin/rm -f *.o core
 
 realclean: clean
-	@cd pngwriter/src && $(MAKE) -f Makefile.gnu clean
 	@rm -f $(PNGWRITERLIB)
 	@rm -f $(TARGET)
-	@rm -f mandelbrot.png
+
 
 # dependencies
 #
-main.o  : main.cu matadd.h multMV.h datatools.h
-multMV.o: multMV.cu
-matadd.o: matadd.c
+
+main.o  : main.cu matmatgpu.h datatools.h
+matmatgpu.o: matmatgpu.cu
 datatools.o: datatools.cu

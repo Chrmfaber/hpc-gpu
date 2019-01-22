@@ -6,10 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "datatools.h"
-
 // Using single indexed arrays
-void init_data(int m, int n, double **A, double **B) {
+void init_data(int m, int n, double *A, double *B) {
 
   int i, j;
 

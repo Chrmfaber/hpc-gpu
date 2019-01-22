@@ -4,6 +4,7 @@
 #include <omp.h>
 
 #include "matmatgpu.h"
+#include "datatools.h"
 
 #define mytimer clock
 #define delta_t(a,b) (1e3 * (b - a) / CLOCKS_PER_SEC)
@@ -41,27 +42,27 @@ main(int argc, char *argv[]) {
     cudaMallocHost((void **)&C, size);
 
     // device
-    cudaMalloc((void **)&d_A, size)
-    cudaMalloc((void **)&d_B, size)
-    cudaMalloc((void **)&d_C, size)
+    cudaMalloc((void **)&d_A, size);
+    cudaMalloc((void **)&d_B, size);
+    cudaMalloc((void **)&d_C, size);
 
     // Initalize A with 1s and B with 2s
     init_data(m, n, A, B);
 
     // Copy to device
-    cudaMemcpy(d_A, A, size, cudaMemcpyHostToDevice)
-    cudaMemcpy(d_A, B, size, cudaMemcpyHostToDevice)
+    cudaMemcpy(d_A, A, size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_A, B, size, cudaMemcpyHostToDevice);
 
     if ( A == NULL  || B == NULL || C == NULL) {
        fprintf(stderr, "memory allocation failed!\n");
        return(1);
     }
 
-    mandelgpu<<<num_blocks, num_threads>>>(width, height, d_image, max_iter);
+    matmatgpu<<<num_blocks, num_threads>>>(n, m, d_A, d_B, d_C);
     cudaDeviceSynchronize();
 
     // Copy back to host
-    cudaMemcpy(C, d_C , size, cudaMemcpyDeviceToHost)
+    cudaMemcpy(C, d_C , size, cudaMemcpyDeviceToHost);
 
     // Free memory
     cudaFree(d_A);

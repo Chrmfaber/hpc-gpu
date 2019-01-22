@@ -3,13 +3,12 @@
  * Author:  Bernd Dammann, DTU Compute
  * Version: $Revision: 1.1 $ $Date: 2015/11/10 11:01:43 $
  */
-//#ifndef __DATATOOLS_H
-//#define __DATATOOLS_H
+
 
 void init_data (int m, 		/* number of rows               */
                 int n, 		/* number of columns            */
-		double **A, 	/* two-dim array of size m-by-n */
-		double **B  	/* two-dim array of size m-by-n */
+		double *A, 	/* two-dim array of size m-by-n */
+		double *B  	/* two-dim array of size m-by-n */
                );
 
 void init_M (int m, int n, double **A);
@@ -27,4 +26,4 @@ double ** malloc_2d(int m, 	/* number of rows               */
 		   );
 
 void free_2d(double **A);       /* free data allocated by malloc_2d */
-//#endif
+
