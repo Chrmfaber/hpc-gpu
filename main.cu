@@ -11,8 +11,11 @@
 
 int main(int argc, char *argv[]) {
 
+
   int n = 10;
   int m = 10;
+  int k = 10;
+
 
   double tcpu1;
 
@@ -33,20 +36,23 @@ int main(int argc, char *argv[]) {
   double *d_A, *d_B, *d_C;
 
   // Size of matrix
-  int size = n * m * sizeof(double);
+  int size_A = m * k * sizeof(double);
+  int size_B = k * n * sizeof(double);
+  int size_C = m * n * sizeof(double);
 
   // Memory allocation (host)
-  cudaMallocHost((void **)&A, size);
-  cudaMallocHost((void **)&B, size);
-  cudaMallocHost((void **)&C, size);
+  cudaMallocHost((void **)&A, size_A);
+  cudaMallocHost((void **)&B, size_B);
+  cudaMallocHost((void **)&C, size_C);
 
   // device
-  cudaMalloc((void **)&d_A, size);
-  cudaMalloc((void **)&d_B, size);
-  cudaMalloc((void **)&d_C, size);
+  cudaMalloc((void **)&d_A, size_A);
+  cudaMalloc((void **)&d_B, size_B);
+  cudaMalloc((void **)&d_C, size_C);
 
   // Initalize A with 1s and B with 2s
-  init_data(m, n, A, B);
+  init_matrix(m, k, A, 1.0);
+  init_matrix(n, k, B, 2.0);
 
   print_matrix(m, n, A);
   print_matrix(m, n, B);
@@ -60,7 +66,7 @@ int main(int argc, char *argv[]) {
     return (1);
   }
 
-  matmatgpu<<<num_blocks, num_threads>>>(n, m, d_A, d_B, d_C);
+  matmatgpu<<<num_blocks, num_threads>>>(n, m, k, d_A, d_B, d_C);
   cudaDeviceSynchronize();
 
   // Copy back to host
