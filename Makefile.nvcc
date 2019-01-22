@@ -1,0 +1,52 @@
+TARGET	= matmat
+OBJS	= main.o matmatgpu.o
+
+OPT	= -g -O3
+ISA	=
+PARA	= -fopenmp
+
+XOPTS = -Xptxas=-v -arch=sm_70 -lineinfo
+
+PNGWRITERPATH =
+ARCH	      =
+PNGWRTLPATH   =
+PNGWRTIPATH   =
+PNGWRITERLIB  =
+
+CC	= gcc
+
+CCC	= nvcc
+CXX	= nvcc
+CXXFLAGS= --compiler-options "$(OPT) $(PARA)" $(XOPTS) -I $(PNGWRTIPATH)
+
+CFLAGS	= $(OPT) $(ISA) $(PARA) $(XOPT)
+
+F90C  	= gfortran
+LIBS	=
+
+CUDA_PATH ?= /appl/cuda/10.0
+INCLUDES = -I$(CUDA_PATH)/include -I$(CUDA_PATH)/samples/common/inc
+
+all:  $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) $(LIBS)
+
+
+.SUFFIXES: .cu
+.cu.o:
+	$(CXX) -o $*.o -c $*.cu $(CXXFLAGS) $(SOFLAGS) $(INCLUDES)
+
+clean:
+	@/bin/rm -f *.o core
+
+realclean: clean
+	@cd pngwriter/src && $(MAKE) -f Makefile.gnu clean
+	@rm -f $(PNGWRITERLIB)
+	@rm -f $(TARGET)
+	@rm -f mandelbrot.png
+
+# dependencies
+#
+main.o  : main.cu matmatgpu.h
+matmatgpu.o: matmatgpu.cu
