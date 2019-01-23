@@ -1,51 +1,29 @@
-
-TARGET	= matmat
-OBJS	= main.o datatools.o matmatgpu.o 
-
+TARGET	= libmatmult.so
+LIBSRCS	= 
+LIBOBJS	= 
 
 OPT	= -g -O3
-ISA	=
-PARA	= -fopenmp
+PIC = -fpic
+OMP   = -fopenmp
+XPIC  = -Xcompiler -fpic
+XOPT  = -Xptxas=-v # use -lineinfo for profiler, use -G for debugging
+XARCH = -arch=sm_70
 
-XOPTS = -Xptxas=-v -arch=sm_70 -lineinfo
-
-CC	= gcc
-
-CCC	= nvcc
 CXX	= nvcc
-CXXFLAGS= --compiler-options "$(OPT) $(PARA)" $(XOPTS)
-
-CFLAGS	= $(OPT) $(ISA) $(PARA) $(XOPT)
-
-F90C  	= gfortran
-LIBS	=
+CXXFLAGS = --compiler-options "$(OPT) $(PIC) $(OMP)" $(XARCH) $(XOPT) $(XPIC)
 
 CUDA_PATH ?= /appl/cuda/10.0
 INCLUDES = -I$(CUDA_PATH)/include -I$(CUDA_PATH)/samples/common/inc
 
-all: $(PNGWRITERLIB) $(TARGET)
+SOFLAGS = -shared
+XLIBS	= -lcublas
 
-$(TARGET): $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) $(LIBS)
-
-$(PNGWRITERLIB):
-	@cd pngwriter/src && $(MAKE) -f Makefile.gnu
+$(TARGET): $(LIBOBJS)
+	$(CXX) -o $@ $(CXXFLAGS) $(SOFLAGS) $(INCLUDES) $^ $(XLIBS)
 
 .SUFFIXES: .cu
 .cu.o:
 	$(CXX) -o $*.o -c $*.cu $(CXXFLAGS) $(SOFLAGS) $(INCLUDES)
 
 clean:
-	@/bin/rm -f *.o core
-
-realclean: clean
-	@rm -f $(PNGWRITERLIB)
-	@rm -f $(TARGET)
-
-
-# dependencies
-#
-
-main.o  : main.cu matmatgpu.h datatools.h
-matmatgpu.o: matmatgpu.cu
-datatools.o: datatools.cu
+	/bin/rm -f $(TARGET) $(LIBOBJS) 
