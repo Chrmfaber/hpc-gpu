@@ -2,20 +2,34 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include <omp.h>
-
+  void write_matrix(double *U, int N, char filename[40]) {
+      double u;
+      double delta = (2.0 / N);
+      FILE *matrix=fopen(filename, "w");
+      for (int i = 0; i < N; i++) {
+          fprintf(matrix, "\n");
+          for (int j = 0; j < N; j++) {
+              u = U[i*N + j];
+              fprintf(matrix, "%6.2f\t",u);
+          }
+      }
+      fclose(matrix);
+  }
 }
 
 const int device0 = 0;
 #define BLOCK_SIZE 16
 
+
 void __global__ jacobi_gpu2(int N, double delta, int kMAX, double *f, double *u_new, double *u_old) {
     int j = blockIdx.x * blockDim.x + threadIdx.x;
     int i = blockIdx.y * blockDim.y + threadIdx.y;
     double scalar = 1.0/4;
-    if (i <= N && j <= N && i > 0 && j > 0) {
+    if (i < N-1 && j < N-1 && i > 0 && j > 0) {
         u_new[i*N + j] = scalar * (u_old[(i-1)*N + j] + u_old[(i+1)*N + j] + u_old[i*N + (j-1)] + u_old[i*N + (j+1)] +delta*f[i*N + j]);
     }
 }
+
 
 int main(int argc, char *argv[]) {
 
@@ -27,7 +41,7 @@ int main(int argc, char *argv[]) {
     int kMAX, N,i,j;
 
     if (argc == 3) {
-        N = atoi(argv[1]);
+        N = atoi(argv[1]) +2 ;
         kMAX = atoi(argv[2]);
     }
     else {
@@ -106,7 +120,7 @@ int main(int argc, char *argv[]) {
 
     // stats
     double GB = 1.0e-09;
-    double flop = kMAX * (double)(N) * (double)(N) * 10.0;
+    double flop = kMAX * (double)(N-2) * (double)(N-2) * 10.0;
     double gflops  = (flop / tot_time_compute) * GB;
     double memory  = size_f + size_u_new + size_u_old;
     double memoryGBs  = memory * GB * (1 / tot_time_compute);
@@ -119,6 +133,8 @@ int main(int argc, char *argv[]) {
     //printf("%g\t", time_IO_1 + time_IO_2); // I/O time
     //printf("%g\t", tot_time_compute); // compute time
     printf("# GPU2\n");
+
+    write_matrix(h_u_new, N, "gpu2.dat");
 
     // free allocated mem
     cudaFree(d_f), cudaFree(d_u_new), cudaFree(d_u_old);
