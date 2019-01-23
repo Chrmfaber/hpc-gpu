@@ -1,6 +1,6 @@
 TARGET	= libmatmult.so
-LIBSRCS	= matmult_gpu1.cu
-LIBOBJS	= matmult_gpu1.o
+LIBSRCS	= matmult_gpu1.cu matmult_gpu2.cu
+LIBOBJS	= matmult_gpu1.o matmult_gpu2.o
 
 OPT	= -g -O3
 PIC = -fpic
@@ -26,4 +26,4 @@ $(TARGET): $(LIBOBJS)
 	$(CXX) -o $*.o -c $*.cu $(CXXFLAGS) $(SOFLAGS) $(INCLUDES)
 
 clean:
-	/bin/rm -f $(TARGET) $(LIBOBJS) 
+	/bin/rm -f $(TARGET) $(LIBOBJS)

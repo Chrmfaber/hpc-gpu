@@ -1,13 +1,15 @@
 #include <stdio.h>
 
-__global__ void d_gpu1(int m, int n, int k, double *A, double *B, double *C) {
-  int i, j, l;
+__global__ void d_gpu1(int m, int n, int p, double *A, double *B, double *C) {
+  int i, j, k;
 
   double sum = 0;
   for (i = 0; i < m; i++) {
     for (j = 0; j < n; j++) {
-      for (l = 0; l < k; l++) {
-        sum += A[i * k + l] * B[l * m + j];
+
+      for (k = 0; k < p; k++) {
+        sum += A[i * p + k] * B[k * m + j];
+
       }
       C[i * n + j] = sum;
     }
