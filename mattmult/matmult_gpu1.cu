@@ -3,20 +3,18 @@
 __global__ void d_gpu1(int m, int n, int k, double *A, double *B, double *C) {
   int i, j, l;
 
-  if (i >= m)
-    return;
-
   double sum = 0;
   for (i = 0; i < m; i++) {
     for (j = 0; j < n; j++) {
       for (l = 0; l < k; l++) {
         sum += A[i * m + k] * B[l * n + j];
       }
-      C[i * m + j] = sum;
+      C[i * n + j] = sum;
     }
   }
 };
 
+extern "C" {
 void matmult_gpu1(int m, int n, int k, double *A, double *B, double *C) {
   // Copy to device logic
 
@@ -56,10 +54,6 @@ void matmult_gpu1(int m, int n, int k, double *A, double *B, double *C) {
   cudaFree(d_B);
   cudaFree(d_C);
 
-  // Necessary?
-  cudaFreeHost(A);
-  cudaFreeHost(B);
-  cudaFreeHost(C);
-
 
 };
+}
