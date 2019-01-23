@@ -2,7 +2,6 @@
 
 extern "C" { void matmult_gpulib(double *A, double *B, double *C, int m, int k, int n) {
 
-
      // Create a handle for CUBLAS
    	 cublasHandle_t handle;
    	 cublasCreate(&handle);
@@ -22,4 +21,4 @@ extern "C" { void matmult_gpulib(double *A, double *B, double *C, int m, int k, 
      cublasDestroy(handle);
 
    }
- }
+}
