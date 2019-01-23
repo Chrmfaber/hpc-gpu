@@ -16,7 +16,7 @@ __device__ double GetElement(double *A, int row, int col, int stride) {
 
 // Set a matrix element
 __device__ void SetElement(double *A, int row, int col, int stride,
-                           float value) {
+                           double value) {
   A[row * stride + col] = value;
 }
 
@@ -75,8 +75,8 @@ __global__ void d_gpu5(int m, int n, int k, double *A, double *B, double *C) {
     __syncthreads();
     // Multiply Asub and Bsub together
     for (e = 0; e < BLOCK_SIZE; ++e) {
-      printf("As[%d][%d] = %f \n", row, e, As[row][e]);
-      printf("Bs[%d][%d] = %f \n", e, col, Bs[e][col]);
+      // printf("As[%d][%d] = %f \n", row, e, As[row][e]);
+      // printf("Bs[%d][%d] = %f \n", e, col, Bs[e][col]);
       Cvalue += As[row][e] * Bs[e][col];
 
     }
@@ -119,7 +119,31 @@ __host__ void matmult_gpu5(int m, int n, int k, double *h_A, double *h_B,
   d_gpu5<<<dimGrid, dimBlock>>>(m, n, k, d_A, d_B, d_C);
 
   cudaDeviceSynchronize();
-  cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
+  cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost); 
+
+  int i, j;
+  printf("A ------- \n");
+  for (i = 0; i < m; i++) {
+     for (j = 0; j < k; j++) {
+     printf("%f ", h_A[i * k + j]); 
+    }
+    printf("\n");
+  }
+  printf("B ------- \n");
+  for (i = 0; i < k; i++) {
+     for (j = 0; j < n; j++) {
+     printf("%f ", h_B[i * n + j]); 
+    }
+    printf("\n");
+  }
+  printf("C ------- \n");
+  for (i = 0; i < m; i++) {
+     for (j = 0; j < n; j++) {
+     printf("%f ", h_C[i * n + j]); 
+    }
+    printf("\n");
+  }
+
 
   cudaFree(d_A);
   cudaFree(d_B);
