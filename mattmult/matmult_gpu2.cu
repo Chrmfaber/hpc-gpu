@@ -1,4 +1,5 @@
-__global__ void gpu2(int m, int n, int p, double *A, double *B, double *C) {
+#include <stdio.h>
+__global__ void gpu2(int m, int n, int k_max, double *A, double *B, double *C) {
 
     int i, j, k;
     double sum;
@@ -8,10 +9,12 @@ __global__ void gpu2(int m, int n, int p, double *A, double *B, double *C) {
 
     if(!(i >= m || j >= n)){
          sum = 0.0;
-         for(k = 0; k < p; k++){
-            sum += A[i*p+k] * B[k*m+j];
+         for(k = 0; k < k_max; k++){
+            //sum += A[i*k_max+k] * B[k*n+j];
+            sum += A[i*k_max+k] * B[k*n+j];
          }
          C[i*n+j] = sum;
+         //printf("%d %d %f\n", i,j,sum);
       }
 }
 
@@ -22,13 +25,13 @@ extern "C" {__host__ void matmult_gpu2(int m, int n, int k, double *h_A, double 
    int devices;
    cudaGetDeviceCount(&devices);
 
-   int A_elems = n*k;
-   int B_elems = k*m;
-   int C_elems = n*m;
+   int A_elems = m*k;
+   int B_elems = k*n;
+   int C_elems = m*n;
 
-   int size_A = n*k*sizeof(double);
-   int size_B = k*m*sizeof(double);
-   int size_C = n*m*sizeof(double);
+   int size_A = A_elems*sizeof(double);
+   int size_B = B_elems*sizeof(double);
+   int size_C = C_elems*sizeof(double);
 
    cudaMalloc((void**)&d_A, size_A);
    cudaMalloc((void**)&d_B, size_B);
@@ -48,6 +51,30 @@ extern "C" {__host__ void matmult_gpu2(int m, int n, int k, double *h_A, double 
 
    cudaDeviceSynchronize();
    cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
+   int i,j;
+   /*
+   printf("\n");
+   for(i = 0;i < m; i++){
+      for(j = 0;j < k; j++){
+         printf("%f ", h_A[i*k+j]);
+      }
+      printf("\n");
+   }
+   printf("\n");
+   for(i = 0;i < k; i++){
+      for(j = 0;j < n; j++){
+         printf("%f ", h_B[i*k+j]);
+      }
+      printf("\n");
+   }
+   printf("\n");
+   for(i = 0;i < m; i++){
+      for(j = 0;j < n; j++){
+         printf("%f ", h_C[i*k+j]);
+      }
+      printf("\n");
+   }
+   */
 
    cudaFree(d_A);
    cudaFree(d_B);
