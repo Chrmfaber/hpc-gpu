@@ -1,5 +1,6 @@
 __global__ void gpu2(int m, int n, int p, double *A, double *B, double *C) {
 
+<<<<<<< HEAD:mattmult/matmult_gpu2.c
   int i, j, k;
   double sum;
 
@@ -13,6 +14,21 @@ __global__ void gpu2(int m, int n, int p, double *A, double *B, double *C) {
     sum += A[i * p + k] * B[k * m + j];
   }
   C[i * n + j] = sum;
+=======
+    int i, j, k;
+    double sum;
+
+    i = blockIdx.x * blockDim.x + threadIdx.x;
+    j = blockIdx.y * blockDim.y + threadIdx.y;
+
+    if(!(i >= m || j >= n)){
+         sum = 0.0;
+         for(k = 0; k < p; k++){
+            sum += A[i*p+k] * B[k*m+j];
+         }
+         C[i*n+j] = sum;
+      }
+>>>>>>> 636a2332b58e75c3948451cd22db6f85ccd42592:mattmult/matmult_gpu3.cu
 }
 
 __host__ void matmult_gpu2(int m, int n, int k, double *h_A, double *h_B,
