@@ -1,11 +1,11 @@
 #!/bin/sh
 EXPNAME="gpu_matmult"
-#BSUB -J "gpu_matmult"
+#BSUB -J gpu_matmult
 #BSUB -q hpcintrogpu
 #BSUB -gpu "num=1:mode=exclusive_process:mps=yes"
 #BSUB -W 24:00
 #BSUB -R "span[hosts=1]"
-#BSUB -R "rusage[mem=2GB]""
+#BSUB -R "rusage[mem=2GB]"
 #BSUB -B -N
 #BSUB -M 3GB
 
