@@ -2,22 +2,44 @@
 
 extern "C" { void matmult_gpulib(int m, int n, int k,double *A, double *B, double *C) {
 
-     // Create a handle for CUBLAS
-   	 cublasHandle_t handle;
-   	 cublasCreate(&handle);
+  int lda = k, ldb = n, ldc = n;
 
-      const double alf = 1.0;
-      const double bet = 0.0;
-      const double *alpha = &alf;
-      const double *beta = &bet;
+  // Create a handle for CUBLAS
+  cublasHandle_t handle;
+  cublasCreate(&handle);
 
-      int lda = k, ldb = n, ldc = n;
+  const double alf = 1.0;
+  const double bet = 0.0;
+  const double *alpha = &alf;
+  const double *beta = &bet;
 
-     // Do the multiplication
-     cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, n, m, k, alpha, B, ldb, A, lda, beta, C, ldc);
+  /* Allocate device memory */
+  int size_A = k*n*sizeof(double);
+  int size_B = m*k*sizeof(double);
+  int size_C = m*n*sizeof(double);
 
-     // Destroy the handle
-     cublasDestroy(handle);
+  double *d_A, *d_B, *d_C;
+  cudaMalloc((void **)&d_A, size_A);
+  cudaMalloc((void **)&d_B, size_B);
+  cudaMalloc((void **)&d_C, size_C);
 
-   }
+  /* Copy data to device */
+  cudaMemcpy(d_A,A,size_A, cudaMemcpyHostToDevice);
+  cudaMemcpy(d_B,B,size_B, cudaMemcpyHostToDevice);
+  cudaMemcpy(d_C,0,size_C, cudaMemcpyHostToDevice);
+
+  // Do the multiplication
+  cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, m, n, k, alpha, d_B, ldb, d_A, lda, beta, d_C, ldc);
+
+  // Destroy the handle
+  cublasDestroy(handle);
+
+  // Copy result back to host
+  cudaMemcpy(C,d_C,size_C, cudaMemcpyDeviceToHost);
+
+  cudaFree(d_A);
+  cudaFree(d_B);
+  cudaFree(d_C);
 }
+}
+
