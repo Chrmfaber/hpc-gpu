@@ -3,19 +3,6 @@ extern "C" {
 #include <stdlib.h>
 #include <omp.h>
 
-void write_result(double *U, int N, double delta, char filename[40]) {
-    double u, y, x;
-    FILE *matrix=fopen(filename, "w");
-    for (int i = 0; i < N; i++) {
-        x = -1.0 + i * delta + delta * 0.5;
-        for (int j = 0; j < N; j++) {
-            y = -1.0 + j * delta + delta * 0.5;
-            u = U[i*N + j];
-            fprintf(matrix, "%g\t%g\t%g\n", x,y,u);
-        }
-    }
-    fclose(matrix);
-}
 }
 
 const int device0 = 0;
@@ -26,7 +13,7 @@ void __global__ jacobi_gpu1(int N, double delta, int kMAX, double *f, double *u_
     for (i = 1; i <= N; i++) {
         for (j = 1; j <= N; j++) {
             // Update u
-            u_new[i*N + j] = scalar * (u_old[(i-1)*N + j] + u_old[(i+1)*N + j] + u_old[i*N + (j-1)] + u_old[i*N + (j+1)] + delta*delta*f[i*N + j]);
+            u_new[i*N + j] = scalar * (u_old[(i-1)*N + j] + u_old[(i+1)*N + j] + u_old[i*N + (j-1)] + u_old[i*N + (j+1)] + delta*f[i*N + j]);
         }
     }
 }
@@ -125,7 +112,7 @@ int main(int argc, char *argv[]) {
     double memory  = size_f + size_u_new + size_u_old;
     double memoryGBs  = memory * GB * (1 / tot_time_compute);
 
-    printf("%g\t", N);
+    printf("%d\t", N);
     printf("%g\t", memory); // footprint
     printf("%g\t", gflops); // Gflops
     //printf("%g\t", memoryGBs); // bandwidth GB/s
@@ -133,9 +120,6 @@ int main(int argc, char *argv[]) {
     //printf("%g\t", time_IO_1 + time_IO_2); // I/O time
     printf("%g\t", tot_time_compute); // compute time
     printf("# GPU1\n");
-
-
-    //write_result(h_u_new, N, delta, "jacobi_gpu1.dat");
 
     // free mem
     cudaFree(d_f), cudaFree(d_u_new), cudaFree(d_u_old);

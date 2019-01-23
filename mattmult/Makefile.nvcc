@@ -1,6 +1,11 @@
 TARGET	= libmatmult.so
+<<<<<<< HEAD
+LIBSRCS	= matmult_gpu1.cu matmult_gpulib.cu
+LIBOBJS	= matmult_gpu1.o matmult_gpulib.o
+=======
 LIBSRCS	= matmult_gpu1.cu matmult_gpu2.cu
 LIBOBJS	= matmult_gpu1.o matmult_gpu2.o
+>>>>>>> 636a2332b58e75c3948451cd22db6f85ccd42592
 
 OPT	= -g -O3
 PIC = -fpic
