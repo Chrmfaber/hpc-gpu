@@ -6,7 +6,7 @@
 #include <cstdio>
 #include <datatools.h>
 
-void cublasDgemm(const float *A, const float *B, float *C, const int m, const int k, const int n) {
+void matmult_gpulib(const float *A, const float *B, float *C, const int m, const int k, const int n) {
       int lda=m,ldb=k,ldc=m;
       const float alf = 1.0;
       const float bet = 0.0;
