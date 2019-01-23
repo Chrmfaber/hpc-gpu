@@ -52,25 +52,25 @@ int main(int argc, char *argv[]) {
 
   // Initalize A with 1s and B with 2s
   init_matrix(m, k, A, 1.0);
-  init_matrix(n, k, B, 2.0);
+  init_matrix(k, n, B, 2.0);
 
-  print_matrix(m, n, A);
-  print_matrix(m, n, B);
+  print_matrix(m, k, A);
+  print_matrix(k, n, B);
 
   // Copy to device
-  cudaMemcpy(d_A, A, size, cudaMemcpyHostToDevice);
-  cudaMemcpy(d_B, B, size, cudaMemcpyHostToDevice);
+  cudaMemcpy(d_A, A, size_A, cudaMemcpyHostToDevice);
+  cudaMemcpy(d_B, B, size_B, cudaMemcpyHostToDevice);
 
   if (A == NULL || B == NULL || C == NULL) {
     fprintf(stderr, "memory allocation failed!\n");
     return (1);
   }
 
-  matmatgpu<<<num_blocks, num_threads>>>(n, m, k, d_A, d_B, d_C);
+  // matmatgpu<<<num_blocks, num_threads>>>(n, m, k, d_A, d_B, d_C);
   cudaDeviceSynchronize();
 
   // Copy back to host
-  cudaMemcpy(C, d_C, size, cudaMemcpyDeviceToHost);
+  cudaMemcpy(C, d_C, size_C, cudaMemcpyDeviceToHost);
 
   print_matrix(m, n, C);
 

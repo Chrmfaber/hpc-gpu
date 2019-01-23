@@ -13,7 +13,7 @@ void init_matrix(int m, int n, double *A, double value) {
 
   for (i = 0; i < m; i++)
     for (j = 0; j < n; j++) {
-      A[i * n + j] = value;
+      A[i * m + j] = value;
     }
 }
 
