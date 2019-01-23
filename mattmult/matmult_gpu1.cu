@@ -1,7 +1,6 @@
 #include <stdio.h>
 
-__global__ void matmult_gpu1(int m, int n, int k, double *A, double *B,
-                             double *C) {
+void matmult_gpu1(int m, int n, int k, double *A, double *B, double *C) {
   int i, j, l;
   i = blockIdx.x * blockDim.x + threadIdx.x;
   if (i >= m)
