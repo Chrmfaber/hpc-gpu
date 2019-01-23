@@ -7,7 +7,7 @@ __global__ void d_gpu1(int m, int n, int k, double *A, double *B, double *C) {
   for (i = 0; i < m; i++) {
     for (j = 0; j < n; j++) {
       for (l = 0; l < k; l++) {
-        sum += A[i * m + k] * B[l * n + j];
+        sum += A[i * k + l] * B[k * m + j];
       }
       C[i * n + j] = sum;
     }
@@ -53,7 +53,5 @@ void matmult_gpu1(int m, int n, int k, double *A, double *B, double *C) {
   cudaFree(d_A);
   cudaFree(d_B);
   cudaFree(d_C);
-
-
 };
 }
