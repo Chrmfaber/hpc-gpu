@@ -4,7 +4,7 @@ extern "C" { void matmult_gpulib(int m, int n, int k,double *A, double *B, doubl
 
      // Create a handle for CUBLAS
    	 cublasHandle_t handle;
-   	 //cublasCreate(&handle);
+   	 cublasCreate(&handle);
 
       const double alf = 1.0;
       const double bet = 0.0;
