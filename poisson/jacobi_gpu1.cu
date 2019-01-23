@@ -3,6 +3,19 @@ extern "C" {
 #include <stdlib.h>
 #include <omp.h>
 
+void write_matrix(double *U, int N, char filename[40]) {
+    double u;
+    double delta = (2.0 / N);
+    FILE *matrix=fopen(filename, "w");
+    for (int i = 0; i < N; i++) {
+        fprintf(matrix, "\n");
+        for (int j = 0; j < N; j++) {
+            u = U[i*N + j];
+            fprintf(matrix, "%6.2f\t",u);
+        }
+    }
+    fclose(matrix);
+}
 }
 
 const int device0 = 0;
@@ -10,9 +23,8 @@ const int device0 = 0;
 void __global__ jacobi_gpu1(int N, double delta, int kMAX, double *f, double *u_new, double *u_old) {
     int j,i;
     double scalar = 1.0 / 4;
-    for (i = 1; i <= N; i++) {
-        for (j = 1; j <= N; j++) {
-            // Update u
+    for (i = 1; i < N-1; i++) {
+        for (j = 1; j < N-1; j++) {
             u_new[i*N + j] = scalar * (u_old[(i-1)*N + j] + u_old[(i+1)*N + j] + u_old[i*N + (j-1)] + u_old[i*N + (j+1)] + delta*f[i*N + j]);
         }
     }
@@ -21,7 +33,7 @@ void __global__ jacobi_gpu1(int N, double delta, int kMAX, double *f, double *u_
 
 int main(int argc, char *argv[]) {
 
-    // warm up:
+    // warm up
     double *dummy_d;
     cudaSetDevice(device0);
     cudaMalloc((void**)&dummy_d, 0);
@@ -29,11 +41,11 @@ int main(int argc, char *argv[]) {
     int i, j, N, kMAX;
 
     if (argc == 3) {
-        N = atoi(argv[1]);
+        N = atoi(argv[1]) + 2;
         kMAX = atoi(argv[2]);
     }
     else {
-        // use default N
+        // use default
         N = 200;
         kMAX = 5000;
     }
@@ -107,7 +119,7 @@ int main(int argc, char *argv[]) {
 
     // stats
     double GB = 1.0e-09;
-    double flop = kMAX * (double)(N) * (double)(N) * 10.0;
+    double flop = kMAX * (double)(N-2) * (double)(N-2) * 10.0;
     double gflops  = (flop / tot_time_compute) * GB;
     double memory  = size_f + size_u_new + size_u_old;
     double memoryGBs  = memory * GB * (1 / tot_time_compute);
@@ -118,8 +130,9 @@ int main(int argc, char *argv[]) {
     //printf("%g\t", memoryGBs); // bandwidth GB/s
     printf("%g\t", tot_time_compute); // total time
     //printf("%g\t", time_IO_1 + time_IO_2); // I/O time
-    printf("%g\t", tot_time_compute); // compute time
+    //printf("%g\t", tot_time_compute); // compute time
     printf("# GPU1\n");
+    write_matrix(h_u_new, N, "gpu1.dat");
 
     // free mem
     cudaFree(d_f), cudaFree(d_u_new), cudaFree(d_u_old);

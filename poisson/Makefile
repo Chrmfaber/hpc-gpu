@@ -6,6 +6,11 @@ TARGET_2 = jacobi_gpu2
 SRCS_2	 = jacobi_gpu2.cu
 OBJS_2	 = jacobi_gpu2.o
 
+TARGET_3 = jacobi_gpu3
+SRCS_3	 = jacobi_gpu3.cu
+OBJS_3	 = jacobi_gpu3.o
+
+
 OPT = -g
 PIC =
 XOPTS = -Xptxas=-v
@@ -23,13 +28,18 @@ XLIBS	= -L$(CUDA_PATH)/lib -lcublas
 
 
 # define project
-all : $(TARGET_1) $(TARGET_2)
+all : $(TARGET_1) $(TARGET_2) $(TARGET_3)
 
 $(TARGET_1): $(OBJS_1)
 	$(CXX) -o $@ $(CXXFLAGS) $(SOFLAGS) $(INCLUDES) $^ $(XLIBS)
 
 $(TARGET_2): $(OBJS_2)
 	$(CXX) -o $@ $(CXXFLAGS) $(SOFLAGS) $(INCLUDES) $^ $(XLIBS)
+
+$(TARGET_3): $(OBJS_3)
+	$(CXX) -o $@ $(CXXFLAGS) $(SOFLAGS) $(INCLUDES) $^ $(XLIBS)
+
+
 
 
 .SUFFIXES: .cu
@@ -39,3 +49,4 @@ $(TARGET_2): $(OBJS_2)
 clean:
 	@/bin/rm -f $(TARGET_1) $(OBJS_1)
 	@/bin/rm -f $(TARGET_2) $(OBJS_2)
+	@/bin/rm -f $(TARGET_3) $(OBJS_3)
