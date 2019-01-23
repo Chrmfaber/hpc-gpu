@@ -7,7 +7,7 @@ __global__ void d_gpu1(int m, int n, int k, double *A, double *B, double *C) {
   for (i = 0; i < m; i++) {
     for (j = 0; j < n; j++) {
       for (l = 0; l < k; l++) {
-        sum += A[i * k + l] * B[k * m + j];
+        sum += A[i * k + l] * B[l * m + j];
       }
       C[i * n + j] = sum;
     }
