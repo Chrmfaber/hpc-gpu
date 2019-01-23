@@ -43,7 +43,7 @@ void matmult_gpu1(int m, int n, int k, double *A, double *B, double *C) {
   cudaMemcpy(d_A, B, size_B, cudaMemcpyHostToDevice);
 
   // launch kernel
-  d_gpu1<<<num_blocks, num_threads>>>(m, n, k, A, B, C);
+  d_gpu1<<<num_blocks, num_threads>>>(m, n, k, d_A, d_B, d_C);
 
   // sync threads
   cudaDeviceSynchronize();
