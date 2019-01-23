@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
     cudaMallocHost((void**)&h_u_new, size_u_new);
     cudaMallocHost((void**)&h_u_old, size_u_old);
 
-    // initilize boarder
+    // Set f and bordes for u
     for (i = 0; i < N; i++){
         for (j = 0; j < N; j++){
             if (i >= N * 0.5  &&  i <= N * 2.0/3.0  &&  j >= N * 1.0/6.0  &&  j <= N * 1.0/3.0)
