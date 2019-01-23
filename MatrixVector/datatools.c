@@ -11,7 +11,7 @@
 #include "datatools.h"
 
 void
-init_data (int m, int n, double **A, double **B ) {
+init_data (int m, int n, double **A, double **B) {
 
    int i, j;
 
