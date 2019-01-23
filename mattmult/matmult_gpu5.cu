@@ -1,4 +1,6 @@
-__global__ void gpu2(int m, int n, int p, double *A, double *B, double *C) {
+#define BLOCK_SIZE 16
+
+__global__ void d_gpu5(int m, int n, int p, double *A, double *B, double *C) {
 
   int i, j, k;
   double sum;
@@ -15,9 +17,9 @@ __global__ void gpu2(int m, int n, int p, double *A, double *B, double *C) {
   }
 }
 
-__host__ void matmult_gpu2(int m, int n, int k, double *h_A, double *h_B,
+extern "C" {
+__host__ void matmult_gpu5(int m, int n, int k, double *h_A, double *h_B,
                            double *h_C) {
-  int i, m, n, k, N = NREPEAT;
   double *d_A, *d_B, *d_C;
 
   int devices;
@@ -38,14 +40,14 @@ __host__ void matmult_gpu2(int m, int n, int k, double *h_A, double *h_B,
   cudaMemcpy(d_A, h_A, size_A, cudaMemcpyHostToDevice);
   cudaMemcpy(d_B, h_B, size_B, cudaMemcpyHostToDevice);
 
-  int lockx = 16;
+  int blockx = 16;
   int blocky = 16;
   dim3 dimBlock(blockx, blocky, 1);
   int gridx = (n / blockx) + 1;
   int gridy = (m / blocky) + 1;
   dim3 dimGrid(gridx, gridy, 1);
 
-  multMM<<<dimGrid, dimBlock>>>(m, n, k, d_A, d_B, d_C);
+  gpu2<<<dimGrid, dimBlock>>>(m, n, k, d_A, d_B, d_C);
 
   cudaDeviceSynchronize();
   cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
@@ -53,4 +55,5 @@ __host__ void matmult_gpu2(int m, int n, int k, double *h_A, double *h_B,
   cudaFree(d_A);
   cudaFree(d_B);
   cudaFree(d_C);
+}
 }

@@ -6,13 +6,13 @@ __global__ void gpu2(int m, int n, int p, double *A, double *B, double *C) {
   i = blockIdx.x * blockDim.x + threadIdx.x;
   j = blockIdx.y * blockDim.y + threadIdx.y;
 
-  if (!(i >= m || j >= n)) {
-    sum = 0.0;
-    for (k = 0; k < p; k++) {
-      sum += A[i * p + k] * B[k * m + j];
-    }
-    C[i * n + j] = sum;
+  if (i >= m || j >= n)
+    return;
+  sum = 0.0;
+  for (k = 0; k < p; k++) {
+    sum += A[i * p + k] * B[k * m + j];
   }
+  C[i * n + j] = sum;
 }
 
 __host__ void matmult_gpu2(int m, int n, int k, double *h_A, double *h_B,
