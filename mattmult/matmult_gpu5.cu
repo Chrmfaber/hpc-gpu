@@ -1,3 +1,5 @@
+#define BLOCK_SIZE 16
+
 __global__ void d_gpu5(int m, int n, int p, double *A, double *B, double *C) {
 
   int i, j, k;
