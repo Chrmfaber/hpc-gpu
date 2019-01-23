@@ -10,7 +10,8 @@ EXPNAME="gpu_matmult"
 #BSUB -M 3GB
 
 NMK="10 20 30 40 50 100 200 300 400 500 1000 2000 3000 4000"
-TYPE="nat lib blk knm kmn mnk mkn nkm nmk per gpulib gpu1 gpu2 gpu3 gpu4 gpu5 gpu6"
+#TYPE="nat lib blk knm kmn mnk mkn nkm nmk per gpulib gpu1 gpu2 gpu3 gpu4 gpu5 gpu6"
+TYPE="gpulib gpu1 gpu2 gpu3"
 LOGEXT=dat
 
 for TTT in $TYPE
