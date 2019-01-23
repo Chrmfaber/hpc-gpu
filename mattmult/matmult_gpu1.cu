@@ -3,20 +3,18 @@
 __global__ void d_gpu1(int m, int n, int k, double *A, double *B, double *C) {
   int i, j, l;
 
-  if (i >= m)
-    return;
-
   double sum = 0;
-  for (i = 0, i < m; i++) {
+  for (i = 0; i < m; i++) {
     for (j = 0; j < n; j++) {
       for (l = 0; l < k; l++) {
         sum += A[i * m + k] * B[l * n + j];
       }
-      C[i * m + j] = sum;
+      C[i * n + j] = sum;
     }
   }
 };
 
+extern "C" {
 void matmult_gpu1(int m, int n, int k, double *A, double *B, double *C) {
   // Copy to device logic
 
@@ -39,8 +37,8 @@ void matmult_gpu1(int m, int n, int k, double *A, double *B, double *C) {
   cudaMalloc((void **)&d_C, size_C);
 
   // Copy to device
-  cudaMemcpy(d_A, A, size, cudaMemcpyHostToDevice);
-  cudaMemcpy(d_A, B, size, cudaMemcpyHostToDevice);
+  cudaMemcpy(d_A, A, size_A, cudaMemcpyHostToDevice);
+  cudaMemcpy(d_A, B, size_B, cudaMemcpyHostToDevice);
 
   // launch kernel
   d_gpu1<<<num_blocks, num_threads>>>(m, n, k, A, B, C);
@@ -49,17 +47,13 @@ void matmult_gpu1(int m, int n, int k, double *A, double *B, double *C) {
   cudaDeviceSynchronize();
 
   // Copy back to host
-  cudaMemcpy(C, d_C, size, cudaMemcpyDeviceToHost);
+  cudaMemcpy(C, d_C, size_C, cudaMemcpyDeviceToHost);
 
   // Free memory
   cudaFree(d_A);
   cudaFree(d_B);
   cudaFree(d_C);
 
-  // Necessary?
-  cudaFreeHost(A);
-  cudaFreeHost(B);
-  cudaFreeHost(C);
 
-  return (0);
 };
+}
