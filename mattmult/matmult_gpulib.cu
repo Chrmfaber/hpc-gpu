@@ -1,6 +1,6 @@
 #include <cublas_v2.h>
 
-extern "C" { void matmult_gpulib(double *A, double *B, double *C, int m, int n, int k) {
+extern "C" { void matmult_gpulib(int m, int n, int k,double *A, double *B, double *C) {
 
      // Create a handle for CUBLAS
    	 cublasHandle_t handle;
@@ -11,10 +11,10 @@ extern "C" { void matmult_gpulib(double *A, double *B, double *C, int m, int n, 
       const double *alpha = &alf;
       const double *beta = &bet;
 
-      int lda = m, ldb = k, ldc = m;
+      int lda = k, ldb = n, ldc = n;
 
      // Do the multiplication
-     cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
+     cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, n, m, k, alpha, B, ldb, A, lda, beta, C, ldc);
 
      // Destroy the handle
      cublasDestroy(handle);
