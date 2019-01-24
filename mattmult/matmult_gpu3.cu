@@ -15,6 +15,12 @@ __global__ void gpu3_row(int m, int n, int k_max, double *A, double *B, double *
          }
          C[i*n+j] = sum1;
          C[(i+1)*n+j] = sum2;
+      }else if(!(i >= m-1 || j >= n)){
+         sum1 = 0.0;
+         for(k = 0; k < k_max; k++){
+            sum1 += A[i*k_max+k] * B[k*n+j];
+         }
+         C[i*n+j] = sum1;
       }
 }
 __global__ void gpu3_column(int m, int n, int k_max, double *A, double *B, double *C) {
@@ -34,7 +40,7 @@ __global__ void gpu3_column(int m, int n, int k_max, double *A, double *B, doubl
          }
          C[i*n+j] = sum1;
          C[i*n+(j+1)] = sum2;
-      }else if(!(i = m || j = n-1)){
+      }else if(!(i >= m || j >= n-1)){
            sum1 = 0.0;
            //sum2 = 0.0;
            for(k = 0; k < k_max; k++){
