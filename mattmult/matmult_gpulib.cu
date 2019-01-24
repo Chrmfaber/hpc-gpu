@@ -14,9 +14,9 @@ extern "C" { void matmult_gpulib(int m, int n, int k,double *A, double *B, doubl
   const double *beta = &bet;
 
   /* Allocate device memory */
-  int size_A = k*n*sizeof(double);
-  int size_B = m*k*sizeof(double);
-  int size_C = m*n*sizeof(double);
+  int size_A = k*m*sizeof(double);
+  int size_B = n*k*sizeof(double);
+  int size_C = n*m*sizeof(double);
 
   double *d_A, *d_B, *d_C;
   cudaMalloc((void **)&d_A, size_A);
@@ -26,7 +26,7 @@ extern "C" { void matmult_gpulib(int m, int n, int k,double *A, double *B, doubl
   /* Copy data to device */
   cudaMemcpy(d_A,A,size_A, cudaMemcpyHostToDevice);
   cudaMemcpy(d_B,B,size_B, cudaMemcpyHostToDevice);
-  cudaMemcpy(d_C,0,size_C, cudaMemcpyHostToDevice);
+  cudaMemcpy(d_C,C,size_C, cudaMemcpyHostToDevice);
 
   // Do the multiplication
   cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, n, m, k, alpha, d_B, ldb, d_A, lda, beta, d_C, ldc);
