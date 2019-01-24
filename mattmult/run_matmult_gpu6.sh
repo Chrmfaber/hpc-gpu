@@ -1,30 +1,24 @@
 #!/bin/sh
-EXPNAME="gpu_matmult"
-#BSUB -J gpu_matmult
+EXPNAME="gpu5_matmult_bs8"
+#BSUB -J gpu5_matmult_bs8
 #BSUB -q hpcintrogpu
 #BSUB -gpu "num=1:mode=exclusive_process:mps=yes"
 #BSUB -W 24:00
 #BSUB -R "span[hosts=1]"
-#BSUB -R "rusage[mem=2GB]"
+#BSUB -R "rusage[mem=16GB]"
 #BSUB -B -N
-#BSUB -M 3GB
+
 
 module load cuda/10.0
 module load gcc/7.3.0
 
-NMK="10 20 30 40 50 100 200 300 400 500 1000 2000 3000 4000"
-#TYPE="nat lib blk knm kmn mnk mkn nkm nmk per gpulib gpu1 gpu2 gpu3 gpu4 gpu5 gpu6"
-TYPE="gpu6"
+# NMK="16 20 30 40 50 100 200 300 400 500 1000 2000 3000 4000"
+NMK="32 64 128 256 512 768 1024 2048 3072 4096 8192 16384"
 LOGEXT=dat
 
-for TTT in $TYPE
-do
 for values in $NMK
 do
-   MATMULT_COMPARE=0  ./matmult_f.nvcc $TTT $values $values $values | grep -v CPU >> Data/$EXPNAME.$TTT.$LOGEXT
-done
+   MATMULT_COMPARE=0  ./matmult_f.nvcc gpu5 $values $values $values | grep -v CPU >> Data/$EXPNAME.$LOGEXT
 done
 
-# time to say 'Good bye' ;-)
-#
 exit 0
