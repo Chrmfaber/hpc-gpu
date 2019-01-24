@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <omp.h>
 
 __global__ void d_gpu1(int m, int n, int k, double *A, double *B, double *C) {
   int i, j, l;
@@ -18,9 +19,9 @@ extern "C" {
 void matmult_gpu1(int m, int n, int k, double *A, double *B, double *C) {
   // Copy to device logic
   int i, j;
-  
 
- 
+
+
 
   // Kernel config
   // TODO: set dynamically
@@ -44,14 +45,19 @@ void matmult_gpu1(int m, int n, int k, double *A, double *B, double *C) {
   cudaMemcpy(d_A, A, size_A, cudaMemcpyHostToDevice);
   cudaMemcpy(d_B, B, size_B, cudaMemcpyHostToDevice);
 
+  double time_start_gpu1 = omp_get_wtime();
   // launch kernel
   d_gpu1<<<num_blocks, num_threads>>>(m, n, k, d_A, d_B, d_C);
 
   // sync threads
   cudaDeviceSynchronize();
 
+  double gpu1_time = omp_get_wtime()-time_start_gpu1;
+
   // Copy back to host
-  cudaMemcpy(C, d_C, size_C, cudaMemcpyDeviceToHost); 
+  cudaMemcpy(C, d_C, size_C, cudaMemcpyDeviceToHost);
+
+  printf("GPUTime = %f\n", gpu1_time);
 
   // Free memory
   cudaFree(d_A);
