@@ -17,6 +17,5 @@ gpu_matmult_gpu5$Flops <- gpu_matmult_gpu5$Flops/1000
 gpu_matmult_gpu5$Memory <- gpu_matmult_gpu5$Memory/1000
 gpu_matmult_gpu5$blk <- as.factor(gpu_matmult_gpu5$blk)
 
-
 ggplot(data=gpu_matmult_gpu5, aes(x=Memory, y=Flops,col=blk)) +
   geom_line()+geom_point()+labs(x="Memory(MB)", y="GFlops/s")
