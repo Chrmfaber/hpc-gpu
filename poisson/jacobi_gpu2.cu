@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
     double GB = 1.0e-09;
     double flop = kMAX * (double)(N-2) * (double)(N-2) * 10.0;
     double gflops  = (flop / tot_time_compute) * GB;
-    double memory  = size*3
+    double memory  = size*3;
     double memoryGBs  = memory * GB * (1 / tot_time_compute);
 
     printf("%d\t", N);
