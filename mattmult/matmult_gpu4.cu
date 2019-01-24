@@ -106,16 +106,16 @@ extern "C" { __host__ void matmult_gpu4(int m, int n, int k, double *h_A, double
    dim3 dimBlock(blockx,blocky,1);
 
    //Grid for column algorithm
-   int gridx = (m/blockx)+1;
-   int gridy = ((n/blocky)+1)/ELEMS + 1;
+   //int gridx = (m/blockx)+1;
+   //int gridy = ((n/blocky)+1)/ELEMS + 1;
 
    //Grid for row algorithm
-   //int gridx = ((m/blockx)+1)/ELEMS + 1;
-   //int gridy = (n/blocky)+1;
+   int gridx = ((m/blockx)+1)/ELEMS + 1;
+   int gridy = (n/blocky)+1;
    dim3 dimGrid(gridx,gridy,1);
 
-   gpu4_column<<<dimGrid,dimBlock>>>(m,n,k,d_A,d_B,d_C);
-   //gpu4_row<<<dimGrid,dimBlock>>>(m,n,k,d_A,d_B,d_C);
+   //gpu4_column<<<dimGrid,dimBlock>>>(m,n,k,d_A,d_B,d_C);
+   gpu4_row<<<dimGrid,dimBlock>>>(m,n,k,d_A,d_B,d_C);
 
    cudaDeviceSynchronize();
    cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
