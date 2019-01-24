@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
     //Copy memory CPU -> GPU
     double time_tmp = omp_get_wtime();
     cudaMemcpy(d_f, h_f, size, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_u_new, h_u_new, size cudaMemcpyHostToDevice);
+    cudaMemcpy(d_u_new, h_u_new, size, cudaMemcpyHostToDevice);
     cudaMemcpy(d_u_old, h_u_old, size, cudaMemcpyHostToDevice);
     double time_IO_1 = omp_get_wtime() - time_tmp;
 
