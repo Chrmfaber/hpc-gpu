@@ -40,15 +40,9 @@ int main(int argc, char *argv[]) {
 
     int i, j, N, kMAX;
 
-    if (argc == 3) {
-        N = atoi(argv[1]) + 2;
-        kMAX = atoi(argv[2]);
-    }
-    else {
-        // use default
-        N = 200;
-        kMAX = 5000;
-    }
+    N = atoi(argv[1]) + 2;
+    kMAX = atoi(argv[2]);
+
     double delta = (2.0 / N) * (2.0 / N);
 
     // allocate mem
