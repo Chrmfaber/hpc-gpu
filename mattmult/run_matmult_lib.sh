@@ -12,7 +12,8 @@ EXPNAME="gpu_matmult"
 module load cuda/10.0
 module load gcc/7.3.0
 
-NMK="10 20 30 40 50 100 200 300 400 500 1000 2000 3000 4000"
+#NMK="10 20 30 40 50 100 200 300 400 500 1000 2000 3000 4000"
+NMK="2 4 6 8 10 12 14 16 18 20 24 28 32 36 40"
 #TYPE="nat lib blk knm kmn mnk mkn nkm nmk per gpulib gpu1 gpu2 gpu3 gpu4 gpu5 gpu6"
 TYPE="lib"
 LOGEXT=dat
