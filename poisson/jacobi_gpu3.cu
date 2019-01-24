@@ -56,41 +56,32 @@ int main(int argc, char *argv[]) {
 
     int kMAX, N,i,j;
 
-    if (argc == 3) {
-        N = atoi(argv[1])+2;
-        kMAX = atoi(argv[2]);
-    }
-    else {
-        // use default N
-        N = 200;
-        kMAX = 5000;
-    }
+    N = atoi(argv[1])+2;
+    kMAX = atoi(argv[2]);
+
     double delta = (2.0 / N) * (2.0 / N);
 
     // allocate mem
     double *h_f, *h_u_new, *h_u_old;
     double *d0_f, *d0_u_new, *d0_u_old, *d1_f, *d1_u_new, *d1_u_old;
 
-    int size_f = N * N * sizeof(double);
-    int size_u_new = N * N * sizeof(double);
-    int size_u_old = N * N * sizeof(double);
-    int size_f_p2 = N*N*0.5;
-    int size_u_new_p2 = N*N*0.5;
-    int size_u_old_p2 = N*N*0.5;
+    int size = N * N * sizeof(double);
+    int size_p2 = N*N*0.5;
+
 
     //Allocate memory on device
     cudaSetDevice(device0);
-    cudaMalloc((void**)&d0_f, size_f/2);
-    cudaMalloc((void**)&d0_u_new, size_u_new/2);
-    cudaMalloc((void**)&d0_u_old, size_u_old/2);
+    cudaMalloc((void**)&d0_f, size/2);
+    cudaMalloc((void**)&d0_u_new, size/2);
+    cudaMalloc((void**)&d0_u_old, size/2);
     cudaSetDevice(device1);
-    cudaMalloc((void**)&d1_f, size_f/2);
-    cudaMalloc((void**)&d1_u_new, size_u_new/2);
-    cudaMalloc((void**)&d1_u_old, size_u_old/2);
+    cudaMalloc((void**)&d1_f, size/2);
+    cudaMalloc((void**)&d1_u_new, size/2);
+    cudaMalloc((void**)&d1_u_old, size/2);
     //Allocate memory on host
-    cudaMallocHost((void**)&h_f, size_f);
-    cudaMallocHost((void**)&h_u_new, size_u_new);
-    cudaMallocHost((void**)&h_u_old, size_u_old);
+    cudaMallocHost((void**)&h_f, size);
+    cudaMallocHost((void**)&h_u_new, size);
+    cudaMallocHost((void**)&h_u_old, size);
 
     // initialize boarder
     for (i = 0; i < N; i++){
@@ -114,13 +105,13 @@ int main(int argc, char *argv[]) {
     //Copy memory host -> device
     double time_tmp = omp_get_wtime();
     cudaSetDevice(device0);
-    cudaMemcpy(d0_f, h_f, size_f/2, cudaMemcpyHostToDevice);
-    cudaMemcpy(d0_u_new, h_u_new, size_u_new/2, cudaMemcpyHostToDevice);
-    cudaMemcpy(d0_u_old, h_u_old, size_u_old/2, cudaMemcpyHostToDevice);
+    cudaMemcpy(d0_f, h_f, size/2, cudaMemcpyHostToDevice);
+    cudaMemcpy(d0_u_new, h_u_new, size/2, cudaMemcpyHostToDevice);
+    cudaMemcpy(d0_u_old, h_u_old, size/2, cudaMemcpyHostToDevice);
     cudaSetDevice(device1);
-    cudaMemcpy(d1_f, h_f + size_f_p2, size_f/2, cudaMemcpyHostToDevice);
-    cudaMemcpy(d1_u_new, h_u_new + size_u_new_p2, size_u_new/2, cudaMemcpyHostToDevice);
-    cudaMemcpy(d1_u_old, h_u_old + size_u_old_p2, size_u_old/2, cudaMemcpyHostToDevice);
+    cudaMemcpy(d1_f, h_f + size_p2, size/2, cudaMemcpyHostToDevice);
+    cudaMemcpy(d1_u_new, h_u_new + size_p2, size/2, cudaMemcpyHostToDevice);
+    cudaMemcpy(d1_u_old, h_u_old + size_p2, size/2, cudaMemcpyHostToDevice);
     double time_IO_1 = omp_get_wtime() - time_tmp;
 
     // peer enable
@@ -160,9 +151,9 @@ int main(int argc, char *argv[]) {
     //Copy memory host -> device
     time_tmp = omp_get_wtime();
     cudaSetDevice(device0);
-    cudaMemcpy(h_u_new, d0_u_new, size_u_new/2, cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_u_new, d0_u_new, size/2, cudaMemcpyDeviceToHost);
     cudaSetDevice(device1);
-    cudaMemcpy(h_u_new + size_u_new_p2, d1_u_new, size_u_new/2, cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_u_new + size_p2, d1_u_new, size/2, cudaMemcpyDeviceToHost);
     double time_IO_2 = omp_get_wtime() - time_tmp;
 
     tot_time_compute += time_IO_1 + time_IO_2;
@@ -171,7 +162,7 @@ int main(int argc, char *argv[]) {
     double GB = 1.0e-09;
     double flop = kMAX * (double)(N) * (double)(N) * 10.0;
     double gflops  = (flop / tot_time_compute) * GB;
-    double memory  = size_f + size_u_new + size_u_old;
+    double memory  = size*3;
     double memoryGBs  = memory * GB * (1 / tot_time_compute);
 
     printf("%d\t", N);
