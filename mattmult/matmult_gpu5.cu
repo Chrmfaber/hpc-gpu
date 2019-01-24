@@ -1,7 +1,7 @@
 #include<stdio.h>
 #include<helper_cuda.h>
 
-#define BLOCK_SIZE 2
+#define BLOCK_SIZE 8
 
 
 // A: stride = k
@@ -16,7 +16,7 @@ __device__ double GetElement(double *A, int row, int col, int stride) {
 
 // Set a matrix element
 __device__ void SetElement(double *A, int row, int col, int stride,
-                           float value) {
+                           double value) {
   A[row * stride + col] = value;
 }
 
@@ -35,7 +35,6 @@ __global__ void d_gpu5(int m, int n, int k, double *A, double *B, double *C) {
   // Block row and column
   int blockRow = blockIdx.y;
   int blockCol = blockIdx.x;
-  printf("Block row = %d, column = %d", blockRow, blockCol);
 
   // Each thread block computes one sub-matrix Csub of C
   double *Csub;
@@ -50,7 +49,7 @@ __global__ void d_gpu5(int m, int n, int k, double *A, double *B, double *C) {
   int col = threadIdx.x;
 
   for (i = 0; i < (k / BLOCK_SIZE); ++i) {
-    printf("i = %d\n", i);
+
     double *Asub, *Bsub;
     // Get sub-matrix Asub of A
     GetSubMatrix(A, &Asub, blockRow, i, k);
@@ -64,10 +63,8 @@ __global__ void d_gpu5(int m, int n, int k, double *A, double *B, double *C) {
 
     // Load Asub and Bsub from device memory to shared memory
     // Each thread loads one element of each sub-matrix
-    printf("Get element Asub row %d, col %d el %f \n", row, col, GetElement(Asub, row, col, k));
-    printf("Get element Bsub row %d, col %d el %f \n", row, col, GetElement(Bsub, row, col, n));
+   
     As[row][col] = GetElement(Asub, row, col, k);
-
     Bs[row][col] = GetElement(Bsub, row, col, n); 
 
     // Synchronize to make sure the sub-matrices are loaded
@@ -75,8 +72,6 @@ __global__ void d_gpu5(int m, int n, int k, double *A, double *B, double *C) {
     __syncthreads();
     // Multiply Asub and Bsub together
     for (e = 0; e < BLOCK_SIZE; ++e) {
-      printf("As[%d][%d] = %f \n", row, e, As[row][e]);
-      printf("Bs[%d][%d] = %f \n", e, col, Bs[e][col]);
       Cvalue += As[row][e] * Bs[e][col];
 
     }
@@ -85,7 +80,7 @@ __global__ void d_gpu5(int m, int n, int k, double *A, double *B, double *C) {
     // computation is done before loading two new
     // sub-matrices of A and B in the next iteration
     __syncthreads();
-    printf("Cvalue = %f \n", Cvalue);
+
 
   }
 
@@ -114,12 +109,14 @@ __host__ void matmult_gpu5(int m, int n, int k, double *h_A, double *h_B,
   cudaMemcpy(d_B, h_B, size_B, cudaMemcpyHostToDevice);
 
   dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
-  dim3 dimGrid(k / dimBlock.x, k / dimBlock.y);
+  dim3 dimGrid(m / dimBlock.x,  n / dimBlock.y);
 
   d_gpu5<<<dimGrid, dimBlock>>>(m, n, k, d_A, d_B, d_C);
 
   cudaDeviceSynchronize();
-  cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
+  cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost); 
+
+  int i, j;
 
   cudaFree(d_A);
   cudaFree(d_B);
