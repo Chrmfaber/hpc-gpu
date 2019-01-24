@@ -48,19 +48,17 @@ int main(int argc, char *argv[]) {
     // allocate mem
     double *h_f, *h_u_new, *h_u_old, *d_f, *d_u_new, *d_u_old;
 
-    int size_f = N * N * sizeof(double);
-    int size_u_new = N * N * sizeof(double);
-    int size_u_old = N * N * sizeof(double);
+    int size = N * N * sizeof(double);
 
     //Allocate memory on device
     cudaSetDevice(device0);
-    cudaMalloc((void**)&d_f, size_f);
-    cudaMalloc((void**)&d_u_new, size_u_new);
-    cudaMalloc((void**)&d_u_old, size_u_old);
+    cudaMalloc((void**)&d_f, size);
+    cudaMalloc((void**)&d_u_new, size);
+    cudaMalloc((void**)&d_u_old, size);
     //Allocate memory on host
-    cudaMallocHost((void**)&h_f, size_f);
-    cudaMallocHost((void**)&h_u_new, size_u_new);
-    cudaMallocHost((void**)&h_u_old, size_u_old);
+    cudaMallocHost((void**)&h_f, size);
+    cudaMallocHost((void**)&h_u_new, size);
+    cudaMallocHost((void**)&h_u_old, size);
 
     // Set f and bordes for u
     for (i = 0; i < N; i++){
