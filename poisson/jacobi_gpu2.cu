@@ -126,6 +126,7 @@ int main(int argc, char *argv[]) {
     //printf("%g\t", tot_time_compute); // compute time
     printf("# GPU2\n");
 
+    //To validate result we can write out the matrix
     write_matrix(h_u_new, N, "gpu2.dat");
 
     // free allocated mem
