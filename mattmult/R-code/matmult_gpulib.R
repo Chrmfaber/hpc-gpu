@@ -24,10 +24,11 @@ gpu_matmult.gpu3_row$Type <- "matmult_gpu3_row"
 gpu_matmult <- rbind(gpu_matmult.gpu1,gpu_matmult.gpu2,gpu_matmult.gpu3_row,gpu_matmult.gpu3_col,gpu_matmult.gpulib)
 
 gpu_matmult$Flops <- gpu_matmult$Flops/1000
+gpu_matmult$Memory <- gpu_matmult$Memory/1000
 gpu_matmult$Type <- as.factor(gpu_matmult$Type)
 
 ggplot(data=gpu_matmult, aes(x=Memory, y=Flops,col=Type)) +
-  geom_line()+geom_point()+labs(x="Memory(kB)", y="GFlops/s")
+  geom_line()+geom_point()+labs(x="Memory(MB)", y="GFlops/s")
 
-ggplot(data=gpu_matmult, aes(x=Memory, y=Flops,col=Type)) + ylim(0,0.16)+xlim(0,30)+
-  geom_line()+geom_point()+labs(x="Memory(kB)", y="GFlops/s")
+ggplot(data=gpu_matmult, aes(x=Memory, y=Flops,col=Type)) + ylim(0,0.16)+xlim(0,0.03)+
+  geom_line()+geom_point()+labs(x="Memory(MB)", y="GFlops/s")
