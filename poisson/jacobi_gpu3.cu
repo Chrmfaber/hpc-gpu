@@ -3,9 +3,9 @@ extern "C" {
 #include <stdlib.h>
 #include <omp.h>
 
+
 void write_matrix(double *U, int N, char filename[40]) {
     double u;
-    double delta = (2.0 / N);
     FILE *matrix=fopen(filename, "w");
     for (int i = 0; i < N; i++) {
         fprintf(matrix, "\n");
@@ -20,16 +20,18 @@ void write_matrix(double *U, int N, char filename[40]) {
 
 const int device0 = 0;
 const int device1 = 1;
-#define BLOCK_SIZE 16
+#define BLOCK_SIZE 1
 
 
 void __global__ jacobi_gpu3_d0(int N, double delta, int kMAX, double *f, double *u_new, double *u_old, double *d1_u_old) {
     int j = blockIdx.x * blockDim.x + threadIdx.x;
     int i = blockIdx.y * blockDim.y + threadIdx.y;
-    if (i <=(N*0.5-1) && j <= (N-1) && i > 0 && j > 0) {
+
+    if (i <(N*0.5-1) && j < (N-1) && i > 0 && j > 0) {
         u_new[i*N + j] = 0.25 * (u_old[(i-1)*N + j] + u_old[(i+1)*N + j] + u_old[i*N + (j-1)] + u_old[i*N + (j+1)] + delta*f[i*N + j]);
     }
-    else if (i == (N*0.5-1) && j < (N-1) && j > 0) {
+    else if (i == (N/2-1) && j < (N-1) && j > 0) {
+
         u_new[i*N + j] = 0.25 * (u_old[(i-1)*N + j] + d1_u_old[j] + u_old[i*N + (j-1)] + u_old[i*N + (j+1)] + delta*f[i*N + j]);
     }
 }
@@ -102,7 +104,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    //Copy memory host -> device
+    //Copy memory CPU -> GPU
     double time_tmp = omp_get_wtime();
     cudaSetDevice(device0);
     cudaMemcpy(d0_f, h_f, size/2, cudaMemcpyHostToDevice);
@@ -148,7 +150,7 @@ int main(int argc, char *argv[]) {
     double tot_time_compute = omp_get_wtime() - time_compute;
     // end program
 
-    //Copy memory host -> device
+    //Copy memory GPU -> CPU
     time_tmp = omp_get_wtime();
     cudaSetDevice(device0);
     cudaMemcpy(h_u_new, d0_u_new, size/2, cudaMemcpyDeviceToHost);

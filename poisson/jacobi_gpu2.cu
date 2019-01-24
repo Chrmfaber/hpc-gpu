@@ -4,7 +4,6 @@ extern "C" {
 #include <omp.h>
   void write_matrix(double *U, int N, char filename[40]) {
       double u;
-      double delta = (2.0 / N);
       FILE *matrix=fopen(filename, "w");
       for (int i = 0; i < N; i++) {
           fprintf(matrix, "\n");
