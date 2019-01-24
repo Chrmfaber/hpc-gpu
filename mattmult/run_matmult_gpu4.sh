@@ -21,7 +21,7 @@ for TTT in $TYPE
 do
 for values in $NMK
 do
-   MATMULT_COMPARE=0  ./matmult_f.nvcc $TTT $values $values $values | grep -v CPU >> Data/$EXPNAME.$TTT.$LOGEXT
+   MATMULT_COMPARE=0  ./matmult_f_v2.nvcc $TTT $values $values $values | grep -v CPU >> Data/$EXPNAME.$TTT.$LOGEXT
 done
 done
 
