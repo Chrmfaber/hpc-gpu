@@ -4,7 +4,6 @@ extern "C" {
 #include <omp.h>
   void write_matrix(double *U, int N, char filename[40]) {
       double u;
-      double delta = (2.0 / N);
       FILE *matrix=fopen(filename, "w");
       for (int i = 0; i < N; i++) {
           fprintf(matrix, "\n");
@@ -127,6 +126,7 @@ int main(int argc, char *argv[]) {
     //printf("%g\t", tot_time_compute); // compute time
     printf("# GPU2\n");
 
+    //To validate result we can write out the matrix
     write_matrix(h_u_new, N, "gpu2.dat");
 
     // free allocated mem
