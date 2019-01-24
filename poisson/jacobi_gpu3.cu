@@ -20,7 +20,7 @@ void write_matrix(double *U, int N, char filename[40]) {
 
 const int device0 = 0;
 const int device1 = 1;
-#define BLOCK_SIZE 1
+#define BLOCK_SIZE 16
 
 
 void __global__ jacobi_gpu3_d0(int N, double delta, int kMAX, double *f, double *u_new, double *u_old, double *d1_u_old) {
