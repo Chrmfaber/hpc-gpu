@@ -1,5 +1,7 @@
 extern "C" {
 #include <cblas.h>
+#include <omp.h>
+#include <stdio.h>
 
 void matmult_lib(int m, int n, int k, double *A, double *B, double *C) {
 
@@ -16,6 +18,10 @@ void matmult_lib(int m, int n, int k, double *A, double *B, double *C) {
   		}
 
   	}
+    double time_start_lib = omp_get_wtime();
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
+  double lib_time = omp_get_wtime()-time_start_lib;
+
+  printf("CPUTime = %f\n", lib_time);
 }
 }

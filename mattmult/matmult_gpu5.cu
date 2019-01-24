@@ -63,9 +63,9 @@ __global__ void d_gpu5(int m, int n, int k, double *A, double *B, double *C) {
 
     // Load Asub and Bsub from device memory to shared memory
     // Each thread loads one element of each sub-matrix
-   
+
     As[row][col] = GetElement(Asub, row, col, k);
-    Bs[row][col] = GetElement(Bsub, row, col, n); 
+    Bs[row][col] = GetElement(Bsub, row, col, n);
 
     // Synchronize to make sure the sub-matrices are loaded
     // before starting the computation
@@ -111,12 +111,20 @@ __host__ void matmult_gpu5(int m, int n, int k, double *h_A, double *h_B,
   dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
   dim3 dimGrid(m / dimBlock.x,  n / dimBlock.y);
 
+
+  double time_start_gpu5 = omp_get_wtime();
+
   d_gpu5<<<dimGrid, dimBlock>>>(m, n, k, d_A, d_B, d_C);
 
   cudaDeviceSynchronize();
-  cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost); 
+
+  double gpu5_time = omp_get_wtime()-time_start_gpu5;
+
+  cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
 
   int i, j;
+
+  printf("GPUTime = %f\n", gpu5_time);
 
   cudaFree(d_A);
   cudaFree(d_B);
