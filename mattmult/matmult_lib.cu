@@ -3,10 +3,8 @@ extern "C" {
 
 void matmult_lib(int m, int n, int k, double *A, double *B, double *C) {
 
-    const double alf = 1.0;
-    const double bet = 0.0;
-    const double *alpha = &alf;
-    const double *beta = &bet;
+    double alpha = 1.0;
+    double beta = 0.0;
 
     int lda = k, ldb = n, ldc = n;
 
