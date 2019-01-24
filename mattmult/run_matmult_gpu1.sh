@@ -9,16 +9,19 @@ EXPNAME="gpu_matmult"
 #BSUB -B -N
 #BSUB -M 3GB
 
+module load cuda/10.0
+module load gcc/7.3.0
+
 NMK="10 20 30 40 50 100 200 300 400 500 1000 2000 3000 4000"
 #TYPE="nat lib blk knm kmn mnk mkn nkm nmk per gpulib gpu1 gpu2 gpu3 gpu4 gpu5 gpu6"
-TYPE="gpulib gpu1 gpu2 gpu3"
+TYPE="gpu1"
 LOGEXT=dat
 
 for TTT in $TYPE
 do
 for values in $NMK
 do
-    ./matmult_f.nvcc $TTT $values $values $values | grep -v CPU >> Data/$EXPNAME.$TTT.$LOGEXT
+   MATMULT_COMPARE=0 ./matmult_f.nvcc $TTT $values $values $values | grep -v CPU >> Data/$EXPNAME.$TTT.$LOGEXT
 done
 done
 
