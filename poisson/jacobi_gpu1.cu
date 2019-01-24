@@ -123,6 +123,8 @@ int main(int argc, char *argv[]) {
     //printf("%g\t", time_IO_1 + time_IO_2); // I/O time
     //printf("%g\t", tot_time_compute); // compute time
     printf("# GPU1\n");
+
+    //To validate result we can write out the matrix
     write_matrix(h_u_new, N, "gpu1.dat");
 
     // free mem

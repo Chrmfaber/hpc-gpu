@@ -175,6 +175,8 @@ int main(int argc, char *argv[]) {
     //printf("%g\t", time_IO_1 + time_IO_2); // I/O time
     //printf("%g\t", tot_time_compute); // compute time
     printf("# GPU3\n");
+
+    //To validate result we can write out the matrix
     write_matrix(h_u_new, N, "gpu3.dat");
 
     // peer enable
