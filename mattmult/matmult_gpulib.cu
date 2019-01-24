@@ -29,7 +29,7 @@ extern "C" { void matmult_gpulib(int m, int n, int k,double *A, double *B, doubl
   cudaMemcpy(d_C,0,size_C, cudaMemcpyHostToDevice);
 
   // Do the multiplication
-  cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, m, n, k, alpha, d_B, ldb, d_A, lda, beta, d_C, ldc);
+  cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, n, m, k, alpha, d_B, ldb, d_A, lda, beta, d_C, ldc);
 
   // Destroy the handle
   cublasDestroy(handle);
