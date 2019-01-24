@@ -1,3 +1,4 @@
+#include <stdio.h>
 __global__ void gpu3_row(int m, int n, int k_max, double *A, double *B, double *C) {
 
     int i, j, k;
@@ -6,7 +7,7 @@ __global__ void gpu3_row(int m, int n, int k_max, double *A, double *B, double *
     i = 2*(blockIdx.x * blockDim.x + threadIdx.x);
     j = blockIdx.y * blockDim.y + threadIdx.y;
 
-    if(!(i >= m || j >= n)){
+    if(!(i >= m-1 || j >= n)){
          sum1 = 0.0;
          sum2 = 0.0;
          for(k = 0; k < k_max; k++){
@@ -15,7 +16,7 @@ __global__ void gpu3_row(int m, int n, int k_max, double *A, double *B, double *
          }
          C[i*n+j] = sum1;
          C[(i+1)*n+j] = sum2;
-      }else if(!(i >= m-1 || j >= n)){
+      }else if(!(i >= m || j >= n)){
          sum1 = 0.0;
          for(k = 0; k < k_max; k++){
             sum1 += A[i*k_max+k] * B[k*n+j];
@@ -31,22 +32,24 @@ __global__ void gpu3_column(int m, int n, int k_max, double *A, double *B, doubl
     i = blockIdx.x * blockDim.x + threadIdx.x;
     j = 2*(blockIdx.y * blockDim.y + threadIdx.y);
 
-    if(!(i >= m || j >= n)){
+    if(!(i >= m || j >= n-1)){
          sum1 = 0.0;
          sum2 = 0.0;
          for(k = 0; k < k_max; k++){
             sum1 += A[i*k_max+k] * B[k*n+j];
             sum2 += A[i*k_max+k] * B[k*n+(j+1)];
          }
+         printf("%f %f\n", sum1, sum2);
          C[i*n+j] = sum1;
          C[i*n+(j+1)] = sum2;
-      }else if(!(i >= m || j >= n-1)){
+      }else if(!(i >= m || j >= n)){
            sum1 = 0.0;
            //sum2 = 0.0;
            for(k = 0; k < k_max; k++){
               sum1 += A[i*k_max+k] * B[k*n+j];
               //sum2 += A[i*k_max+k] * B[k*n+(j+1)];
            }
+           printf("%f\n", sum1);
            C[i*n+j] = sum1;
            //C[i*n+(j+1)] = sum2;
         }
@@ -76,17 +79,48 @@ extern "C" { __host__ void matmult_gpu3(int m, int n, int k, double *h_A, double
    int blockx = 16;
    int blocky = 16;
    dim3 dimBlock(blockx,blocky,1);
-   //int gridx = (m/blockx)+1;
-   //int gridy = ((n/blocky)+1)/2 + 1;
-   int gridx = ((m/blockx)+1)/2 + 1;
-   int gridy = (n/blocky)+1;
+   //for column
+   int gridx = (m/blockx)+1;
+   int gridy = ((n/blocky)+1)/2 + 1;
+
+   //for row
+   //int gridx = ((m/blockx)+1)/2 + 1;
+   //int gridy = (n/blocky)+1;
+
    dim3 dimGrid(gridx,gridy,1);
 
-   //gpu3_column<<<dimGrid,dimBlock>>>(m,n,k,d_A,d_B,d_C);
-   gpu3_row<<<dimGrid,dimBlock>>>(m,n,k,d_A,d_B,d_C);
+   //for column
+   gpu3_column<<<dimGrid,dimBlock>>>(m,n,k,d_A,d_B,d_C);
+
+   //for grid
+   //gpu3_row<<<dimGrid,dimBlock>>>(m,n,k,d_A,d_B,d_C);
 
    cudaDeviceSynchronize();
    cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
+
+   int i,j;
+   printf("\n");
+   for(i = 0;i < m; i++){
+      for(j = 0;j < k; j++){
+         printf("%f ", h_A[i*k+j]);
+      }
+      printf("\n");
+   }
+   printf("\n");
+   for(i = 0;i < k; i++){
+      for(j = 0;j < n; j++){
+         printf("%f ", h_B[i*n+j]);
+      }
+      printf("\n");
+   }
+   printf("\n");
+   for(i = 0;i < m; i++){
+      for(j = 0;j < n; j++){
+         printf("%f ", h_C[i*n+j]);
+      }
+      printf("\n");
+   }
+
 
    cudaFree(d_A);
    cudaFree(d_B);
