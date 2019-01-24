@@ -170,14 +170,13 @@ int main(int argc, char *argv[]) {
     printf("%d\t", N);
     printf("%g\t", memory); // footprint
     printf("%g\t", gflops); // Gflops
-    //printf("%g\t", memoryGBs); // bandwidth GB/s
+    printf("%g\t", memoryGBs); // bandwidth GB/s
     printf("%g\t", tot_time_compute); // total time
-    //printf("%g\t", time_IO_1 + time_IO_2); // I/O time
-    //printf("%g\t", tot_time_compute); // compute time
-    printf("# GPU3\n");
+    printf("%g\t", time_IO_1 + time_IO_2); // I/O time
+    printf("%g\n", tot_time_compute); // compute time
 
     //To validate result we can write out the matrix
-    write_matrix(h_u_new, N, "gpu3.dat");
+    //write_matrix(h_u_new, N, "gpu3.dat");
 
     // peer enable
     cudaSetDevice(device0);
