@@ -40,33 +40,26 @@ int main(int argc, char *argv[]) {
 
     int kMAX, N,i,j;
 
-    if (argc == 3) {
-        N = atoi(argv[1]) +2 ;
-        kMAX = atoi(argv[2]);
-    }
-    else {
-        // use default N
-        N = 200;
-        kMAX = 5000;
-    }
+    N = atoi(argv[1]) +2 ;
+    kMAX = atoi(argv[2]);
+
+
     double delta = (2.0 / N) * (2.0 / N);
 
     // allocate mem
     double *h_f, *h_u_new, *h_u_old, *d_f, *d_u_new, *d_u_old;
 
-    int size_f = N * N * sizeof(double);
-    int size_u_new = N * N * sizeof(double);
-    int size_u_old = N * N * sizeof(double);
+    int size = N * N * sizeof(double);
 
     //Allocate memory on device
     cudaSetDevice(device0);
-    cudaMalloc((void**)&d_f, size_f);
-    cudaMalloc((void**)&d_u_new, size_u_new);
-    cudaMalloc((void**)&d_u_old, size_u_old);
+    cudaMalloc((void**)&d_f, size);
+    cudaMalloc((void**)&d_u_new, size);
+    cudaMalloc((void**)&d_u_old, size);
     //Allocate memory on host
-    cudaMallocHost((void**)&h_f, size_f);
-    cudaMallocHost((void**)&h_u_new, size_u_new);
-    cudaMallocHost((void**)&h_u_old, size_u_old);
+    cudaMallocHost((void**)&h_f, size);
+    cudaMallocHost((void**)&h_u_new, size);
+    cudaMallocHost((void**)&h_u_old, size);
 
     // initilize boarder
     for (i = 0; i <N; i++){
@@ -89,9 +82,9 @@ int main(int argc, char *argv[]) {
 
     //Copy memory CPU -> GPU
     double time_tmp = omp_get_wtime();
-    cudaMemcpy(d_f, h_f, size_f, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_u_new, h_u_new, size_u_old, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_u_old, h_u_old, size_u_old, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_f, h_f, size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_u_new, h_u_new, size cudaMemcpyHostToDevice);
+    cudaMemcpy(d_u_old, h_u_old, size, cudaMemcpyHostToDevice);
     double time_IO_1 = omp_get_wtime() - time_tmp;
 
     // do program
@@ -113,7 +106,7 @@ int main(int argc, char *argv[]) {
 
     //Copy memory GPU -> CPU
     time_tmp = omp_get_wtime();
-    cudaMemcpy(h_u_new, d_u_new, size_u_new, cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_u_new, d_u_new, size, cudaMemcpyDeviceToHost);
     double time_IO_2 = omp_get_wtime() - time_tmp;
 
     tot_time_compute += time_IO_1 + time_IO_2;
@@ -122,7 +115,7 @@ int main(int argc, char *argv[]) {
     double GB = 1.0e-09;
     double flop = kMAX * (double)(N-2) * (double)(N-2) * 10.0;
     double gflops  = (flop / tot_time_compute) * GB;
-    double memory  = size_f + size_u_new + size_u_old;
+    double memory  = size*3
     double memoryGBs  = memory * GB * (1 / tot_time_compute);
 
     printf("%d\t", N);
