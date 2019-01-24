@@ -1,12 +1,12 @@
 TARGET	= libmatmult.so
 LIBSRCS	= matmult_gpu1.cu matmult_gpulib.cu matmult_gpu2.cu matmult_gpu3.cu matmult_gpu5.cu
-LIBOBJS	= matmult_gpu1.o matmult_gpulib.o matmult_gpu2.o matmult_gpu3.o matmult_gpu5.cu
+LIBOBJS	= matmult_gpu1.o matmult_gpulib.o matmult_gpu2.o matmult_gpu3.o matmult_gpu5.o
 
 OPT	= -O3
 PIC = -fpic
 OMP   = -fopenmp
 XPIC  = -Xcompiler -fpic
-XOPT  = -Xptxas=-v # use -lineinfo for profiler, use -G for debugging
+XOPT  = -Xptxas=-v  # use -lineinfo for profiler, use -G for debugging
 XARCH = -arch=sm_70
 
 CXX	= nvcc
