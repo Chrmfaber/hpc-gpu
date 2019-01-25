@@ -1,4 +1,4 @@
-gpu_matmult.lib <- read.table("~/Google Drive/10.semester/02614 HPC/Assignment 3/GIT3/mattmult/Data_v2/gpu_matmult.lib_v2.dat", quote="\"", comment.char="")
+gpu_matmult.lib <- read.table("~/Google Drive/10.semester/02614 HPC/Assignment 3/GIT3/mattmult/Data_v1/gpu_matmult.lib_12core.dat", quote="\"", comment.char="")
 gpu_matmult.gpu3_col <- read.table("~/Google Drive/10.semester/02614 HPC/Assignment 3/GIT3/mattmult/Data_v1/gpu_matmult.gpu3Col.dat", quote="\"", comment.char="")
 gpu_matmult.gpu3_row <- read.table("~/Google Drive/10.semester/02614 HPC/Assignment 3/GIT3/mattmult/Data_v1/gpu_matmult.gpu3Row.dat", quote="\"", comment.char="")
 

@@ -35,7 +35,7 @@ ggplot(data=matmult_gpu4, aes(x=MBMemory, y=GFlops,col=Type))+xlim(0,100)+ylim(0
 
 ##############
 
-gpu_matmult.lib <- read.table("~/Google Drive/10.semester/02614 HPC/Assignment 3/GIT3/mattmult/Data_v2/gpu_matmult.lib_v2.dat", quote="\"", comment.char="")
+gpu_matmult.lib <- read.table("~/Google Drive/10.semester/02614 HPC/Assignment 3/GIT3/mattmult/Data_v1/gpu_matmult.lib_12core.dat", quote="\"", comment.char="")
 gpu_matmult.gpu4_col <- read.table("~/Google Drive/10.semester/02614 HPC/Assignment 3/GIT3/mattmult/Data_v1/gpu_matmult.gpu4Col.dat", quote="\"", comment.char="")
 gpu_matmult.gpu4_row <- read.table("~/Google Drive/10.semester/02614 HPC/Assignment 3/GIT3/mattmult/Data_v1/gpu_matmult.gpu4Row.dat", quote="\"", comment.char="")
 
