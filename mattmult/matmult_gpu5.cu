@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<helper_cuda.h>
+#include <omp.h>
 
 #define BLOCK_SIZE 8
 
