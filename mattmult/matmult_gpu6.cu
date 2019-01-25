@@ -100,9 +100,9 @@ __host__ void matmult_gpu6(int m, int n, int k, float *h_A, float *h_B,
   int size_B = k * n * sizeof(float);
   int size_C = m * n * sizeof(float);
 
-  cudaHostRegister(h_A, size_A);
-  cudaHostRegister(h_B, size_B);
-  cudaHostRegister(h_C, size_C);
+  cudaHostRegister(h_A, size_A, cudaHostRegisterPortable);
+  cudaHostRegister(h_B, size_B, cudaHostRegisterPortable);
+  cudaHostRegister(h_C, size_C, cudaHostRegisterPortable);
 
   cudaMalloc((void **)&d_A, size_A);
   cudaMalloc((void **)&d_B, size_B);
@@ -114,13 +114,10 @@ __host__ void matmult_gpu6(int m, int n, int k, float *h_A, float *h_B,
   dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
   dim3 dimGrid(m / dimBlock.x, n / dimBlock.y);
 
-  float time_start_gpu5 = omp_get_wtime();
 
-  d_gpu5<<<dimGrid, dimBlock>>>(m, n, k, d_A, d_B, d_C);
+  d_gpu6<<<dimGrid, dimBlock>>>(m, n, k, d_A, d_B, d_C);
 
   cudaDeviceSynchronize();
-
-  float gpu5_time = omp_get_wtime() - time_start_gpu5;
 
   cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
 
