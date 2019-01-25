@@ -1,5 +1,6 @@
 #define ELEMS 32
 #include <omp.h>
+#include<stdio.h>
 
 __global__ void gpu4_row(int m, int n, int k_max, double *A, double *B, double *C) {
 
