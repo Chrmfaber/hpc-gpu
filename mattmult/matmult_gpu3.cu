@@ -1,29 +1,32 @@
 #include <stdio.h>
-// __global__ void gpu3_row(int m, int n, int k_max, double *A, double *B, double *C) {
-//
-//    int i, j, k;
-//    double sum1, sum2;
-//
-//    i = 2*(blockIdx.x * blockDim.x + threadIdx.x);
-//    j = blockIdx.y * blockDim.y + threadIdx.y;
-//
-//   if(!(i >= m-1 || j >= n)){
-//         sum1 = 0.0;
-//         sum2 = 0.0;
-//         for(k = 0; k < k_max; k++){
-//            sum1 += A[i*k_max+k] * B[k*n+j];
-//            sum2 += A[(i+1)*k_max+k] * B[k*n+j];
-//         }
-//         C[i*n+j] = sum1;
-//         C[(i+1)*n+j] = sum2;
-//      }else if(!(i >= m || j >= n)){
-//         sum1 = 0.0;
-//         for(k = 0; k < k_max; k++){
-//            sum1 += A[i*k_max+k] * B[k*n+j];
-//         }
-//         C[i*n+j] = sum1;
-//      }
-//}
+
+#include <omp.h>
+__global__ void gpu3_row(int m, int n, int k_max, double *A, double *B, double *C) {
+
+    int i, j, k;
+    double sum1, sum2;
+
+    i = 2*(blockIdx.x * blockDim.x + threadIdx.x);
+    j = blockIdx.y * blockDim.y + threadIdx.y;
+
+    if(!(i >= m-1 || j >= n)){
+         sum1 = 0.0;
+         sum2 = 0.0;
+         for(k = 0; k < k_max; k++){
+            sum1 += A[i*k_max+k] * B[k*n+j];
+            sum2 += A[(i+1)*k_max+k] * B[k*n+j];
+         }
+         C[i*n+j] = sum1;
+         C[(i+1)*n+j] = sum2;
+      }else if(!(i >= m || j >= n)){
+         sum1 = 0.0;
+         for(k = 0; k < k_max; k++){
+            sum1 += A[i*k_max+k] * B[k*n+j];
+         }
+         C[i*n+j] = sum1;
+      }
+}
+
 __global__ void gpu3_column(int m, int n, int k_max, double *A, double *B, double *C) {
 
     int i, j, k;
@@ -39,7 +42,7 @@ __global__ void gpu3_column(int m, int n, int k_max, double *A, double *B, doubl
             sum1 += A[i*k_max+k] * B[k*n+j];
             sum2 += A[i*k_max+k] * B[k*n+(j+1)];
          }
-         printf("%f %f\n", sum1, sum2);
+         // printf("%f %f\n", sum1, sum2);
          C[i*n+j] = sum1;
          C[i*n+(j+1)] = sum2;
       }else if(!(i >= m || j >= n)){
@@ -49,7 +52,7 @@ __global__ void gpu3_column(int m, int n, int k_max, double *A, double *B, doubl
               sum1 += A[i*k_max+k] * B[k*n+j];
               //sum2 += A[i*k_max+k] * B[k*n+(j+1)];
            }
-           printf("%f\n", sum1);
+           // printf("%f\n", sum1);
            C[i*n+j] = sum1;
            //C[i*n+(j+1)] = sum2;
         }

@@ -83,7 +83,7 @@ extern "C" {__host__ void matmult_gpu2(int m, int n, int k, double *h_A, double 
    }
    */
 
-   printf("GPUTime = %f\n", gpu2_time);
+   // printf("GPUTime = %f\n", gpu2_time);
 
    cudaFree(d_A);
    cudaFree(d_B);
