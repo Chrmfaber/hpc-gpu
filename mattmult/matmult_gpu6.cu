@@ -9,26 +9,26 @@
 // C: stride = n
 
 // Get a matrix element
-__device__ double GetElement(double *A, int row, int col, int stride) {
+// __device__ double GetElement(double *A, int row, int col, int stride) {
   // printf("Index at = %d \n", row * stride + col);
-  return A[row * stride + col];
-}
+ // return A[row * stride + col];
+// }
 
 // Set a matrix element
-__device__ void SetElement(double *A, int row, int col, int stride,
-                           double value) {
-  A[row * stride + col] = value;
-}
+// __device__ void SetElement(double *A, int row, int col, int stride,
+ //                          double value) {
+//  A[row * stride + col] = value;
+//}
 
 // Get the BLOCK_SIZExBLOCK_SIZE sub-matrix Asub of A that is
 // located col sub-matrices to the right and row sub-matrices down
 // from the upper-left corner of A
-__device__ void GetSubMatrix(double *A, double **Asub, int row, int col,
-                             int stride) {
-  *Asub = &A[stride * BLOCK_SIZE * row + BLOCK_SIZE * col];
-}
+//__device__ void GetSubMatrix(double *A, double **Asub, int row, int col,
+//                             int stride) {
+//  *Asub = &A[stride * BLOCK_SIZE * row + BLOCK_SIZE * col];
+// }
 
-__global__ void d_gpu5(int m, int n, int k, double *A, double *B, double *C) {
+__global__ void d_gpu6(int m, int n, int k, double *A, double *B, double *C) {
 
   int i, e;
   double sum;
@@ -38,25 +38,27 @@ __global__ void d_gpu5(int m, int n, int k, double *A, double *B, double *C) {
   int blockCol = blockIdx.x;
 
   // Each thread block computes one sub-matrix Csub of C
-  double *Csub;
+  double *Csub = &C[n * BLOCK_SIZE * blockRow + BLOCK_SIZE * blockCol];
+  // GetSubMatrix(C, &Csub, blockRow, blockCol, n);
 
-  GetSubMatrix(C, &Csub, blockRow, blockCol, n);
   // Each thread computes one element of Csub
   // by accumulating results into Cvalue
-  float Cvalue = 0;
+  double Cvalue = 0;
 
   // Thread row and column within Csub
   int row = threadIdx.y;
   int col = threadIdx.x;
 
   for (i = 0; i < (k / BLOCK_SIZE); ++i) {
-
-    double *Asub, *Bsub;
+    //  Example: *Asub = &A[stride * BLOCK_SIZE * row + BLOCK_SIZE * col];
+    double *Asub = &A[k * BLOCK_SIZE * blockRow + BLOCK_SIZE * i];
+    double *Bsub = &B[n * BLOCK_SIZE * i + BLOCK_SIZE * blockCol];
     // Get sub-matrix Asub of A
-    GetSubMatrix(A, &Asub, blockRow, i, k);
+
+    // GetSubMatrix(A, &Asub, blockRow, i, k);
 
     // Get sub-matrix Bsub of B
-    GetSubMatrix(B, &Bsub, i, blockCol, n);
+    // GetSubMatrix(B, &Bsub, i, blockCol, n);
 
     // Shared memory used to store Asub and Bsub respectively
     __shared__ double As[BLOCK_SIZE][BLOCK_SIZE];
@@ -65,8 +67,8 @@ __global__ void d_gpu5(int m, int n, int k, double *A, double *B, double *C) {
     // Load Asub and Bsub from device memory to shared memory
     // Each thread loads one element of each sub-matrix
 
-    As[row][col] = GetElement(Asub, row, col, k);
-    Bs[row][col] = GetElement(Bsub, row, col, n);
+    As[row][col] = Asub[row * k + col];
+    Bs[row][col] = Bsub[row * n + col];
 
     // Synchronize to make sure the sub-matrices are loaded
     // before starting the computation
@@ -84,11 +86,11 @@ __global__ void d_gpu5(int m, int n, int k, double *A, double *B, double *C) {
 
   // Write Csub to device memory
   // Each thread writes one element
-  SetElement(Csub, row, col, n, Cvalue);
+  Csub[row * n + col] = Cvalue;
 }
 
 extern "C" {
-__host__ void matmult_gpu5(int m, int n, int k, double *h_A, double *h_B,
+__host__ void matmult_gpu6(int m, int n, int k, double *h_A, double *h_B,
                            double *h_C) {
   double *d_A, *d_B, *d_C;
 
@@ -97,6 +99,11 @@ __host__ void matmult_gpu5(int m, int n, int k, double *h_A, double *h_B,
   int size_A = m * k * sizeof(double);
   int size_B = k * n * sizeof(double);
   int size_C = m * n * sizeof(double);
+
+  cudaHostRegister(h_A, size_A, cudaHostRegisterPortable);
+  cudaHostRegister(h_B, size_B, cudaHostRegisterPortable);
+  cudaHostRegister(h_C, size_C, cudaHostRegisterPortable);
+
 
   cudaMalloc((void **)&d_A, size_A);
   cudaMalloc((void **)&d_B, size_B);
@@ -109,12 +116,17 @@ __host__ void matmult_gpu5(int m, int n, int k, double *h_A, double *h_B,
   dim3 dimGrid(m / dimBlock.x, n / dimBlock.y);
 
 
-  d_gpu5<<<dimGrid, dimBlock>>>(m, n, k, d_A, d_B, d_C);
+  d_gpu6<<<dimGrid, dimBlock>>>(m, n, k, d_A, d_B, d_C);
 
   cudaDeviceSynchronize();
+  
 
 
   cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
+
+  int i, j; 
+
+
 
   cudaFree(d_A);
   cudaFree(d_B);
