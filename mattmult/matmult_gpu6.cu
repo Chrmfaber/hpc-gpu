@@ -9,50 +9,50 @@
 // C: stride = n
 
 // Get a matrix element
-__device__ float GetElement(float *A, int row, int col, int stride) {
+// __device__ double GetElement(double *A, int row, int col, int stride) {
   // printf("Index at = %d \n", row * stride + col);
-  return A[row * stride + col];
-}
+ // return A[row * stride + col];
+// }
 
 // Set a matrix element
-__device__ void SetElement(float *A, int row, int col, int stride,
-                           float value) {
-  A[row * stride + col] = value;
-}
+// __device__ void SetElement(double *A, int row, int col, int stride,
+ //                          double value) {
+//  A[row * stride + col] = value;
+//}
 
 // Get the BLOCK_SIZExBLOCK_SIZE sub-matrix Asub of A that is
 // located col sub-matrices to the right and row sub-matrices down
 // from the upper-left corner of A
-__device__ void GetSubMatrix(float *A, float **Asub, int row, int col,
-                             int stride) {
-  *Asub = &A[stride * BLOCK_SIZE * row + BLOCK_SIZE * col];
-}
+//__device__ void GetSubMatrix(double *A, double **Asub, int row, int col,
+//                             int stride) {
+//  *Asub = &A[stride * BLOCK_SIZE * row + BLOCK_SIZE * col];
+// }
 
-__global__ void d_gpu6(int m, int n, int k, float *A, float *B, float *C) {
+__global__ void d_gpu6(int m, int n, int k, double *A, double *B, double *C) {
 
   int i, e;
-  float sum;
+  double sum;
 
   // Block row and column
   int blockRow = blockIdx.y;
   int blockCol = blockIdx.x;
 
   // Each thread block computes one sub-matrix Csub of C
-  float *Csub = &C[n * BLOCK_SIZE * blockRow + BLOCK_SIZE * blockCol];
+  double *Csub = &C[n * BLOCK_SIZE * blockRow + BLOCK_SIZE * blockCol];
   // GetSubMatrix(C, &Csub, blockRow, blockCol, n);
 
   // Each thread computes one element of Csub
   // by accumulating results into Cvalue
-  float Cvalue = 0;
+  double Cvalue = 0;
 
   // Thread row and column within Csub
   int row = threadIdx.y;
   int col = threadIdx.x;
 
   for (i = 0; i < (k / BLOCK_SIZE); ++i) {
-
-    float *Asub = &A[k * BLOCK_SIZE * blockRow + BLOCK_SIZE + i];
-    float *Bsub = &B[n * BLOCK_SIZE * i + BLOCK_SIZE + blockCol];
+    //  Example: *Asub = &A[stride * BLOCK_SIZE * row + BLOCK_SIZE * col];
+    double *Asub = &A[k * BLOCK_SIZE * blockRow + BLOCK_SIZE * i];
+    double *Bsub = &B[n * BLOCK_SIZE * i + BLOCK_SIZE * blockCol];
     // Get sub-matrix Asub of A
 
     // GetSubMatrix(A, &Asub, blockRow, i, k);
@@ -61,8 +61,8 @@ __global__ void d_gpu6(int m, int n, int k, float *A, float *B, float *C) {
     // GetSubMatrix(B, &Bsub, i, blockCol, n);
 
     // Shared memory used to store Asub and Bsub respectively
-    __shared__ float As[BLOCK_SIZE][BLOCK_SIZE];
-    __shared__ float Bs[BLOCK_SIZE][BLOCK_SIZE];
+    __shared__ double As[BLOCK_SIZE][BLOCK_SIZE];
+    __shared__ double Bs[BLOCK_SIZE][BLOCK_SIZE];
 
     // Load Asub and Bsub from device memory to shared memory
     // Each thread loads one element of each sub-matrix
@@ -90,19 +90,20 @@ __global__ void d_gpu6(int m, int n, int k, float *A, float *B, float *C) {
 }
 
 extern "C" {
-__host__ void matmult_gpu6(int m, int n, int k, float *h_A, float *h_B,
-                           float *h_C) {
-  float *d_A, *d_B, *d_C;
+__host__ void matmult_gpu6(int m, int n, int k, double *h_A, double *h_B,
+                           double *h_C) {
+  double *d_A, *d_B, *d_C;
 
   cudaSetDevice(1);
 
-  int size_A = m * k * sizeof(float);
-  int size_B = k * n * sizeof(float);
-  int size_C = m * n * sizeof(float);
+  int size_A = m * k * sizeof(double);
+  int size_B = k * n * sizeof(double);
+  int size_C = m * n * sizeof(double);
 
   cudaHostRegister(h_A, size_A, cudaHostRegisterPortable);
   cudaHostRegister(h_B, size_B, cudaHostRegisterPortable);
   cudaHostRegister(h_C, size_C, cudaHostRegisterPortable);
+
 
   cudaMalloc((void **)&d_A, size_A);
   cudaMalloc((void **)&d_B, size_B);
@@ -118,8 +119,14 @@ __host__ void matmult_gpu6(int m, int n, int k, float *h_A, float *h_B,
   d_gpu6<<<dimGrid, dimBlock>>>(m, n, k, d_A, d_B, d_C);
 
   cudaDeviceSynchronize();
+  
+
 
   cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
+
+  int i, j; 
+
+
 
   cudaFree(d_A);
   cudaFree(d_B);
