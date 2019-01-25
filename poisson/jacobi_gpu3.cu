@@ -111,15 +111,15 @@ int main(int argc, char *argv[]) {
   // Copy memory host -> device
   double time_tmp = omp_get_wtime();
   cudaSetDevice(device0);
-  cudaMemcpy(d0_f, h_f, size_f / 2, cudaMemcpyHostToDevice);
-  cudaMemcpy(d0_u_new, h_u_new, size_u_new / 2, cudaMemcpyHostToDevice);
-  cudaMemcpy(d0_u_old, h_u_old, size_u_old / 2, cudaMemcpyHostToDevice);
+  cudaMemcpy(d0_f, h_f, size / 2, cudaMemcpyHostToDevice);
+  cudaMemcpy(d0_u_new, h_u_new, size/ 2, cudaMemcpyHostToDevice);
+  cudaMemcpy(d0_u_old, h_u_old, size / 2, cudaMemcpyHostToDevice);
 
   cudaSetDevice(device1);
-  cudaMemcpy(d1_f, h_f + size_f_p2, size_f / 2, cudaMemcpyHostToDevice);
-  cudaMemcpy(d1_u_new, h_u_new + size_u_new_p2, size_u_new / 2,
+  cudaMemcpy(d1_f, h_f + size_p2, size / 2, cudaMemcpyHostToDevice);
+  cudaMemcpy(d1_u_new, h_u_new + size_p2, size/ 2,
              cudaMemcpyHostToDevice);
-  cudaMemcpy(d1_u_old, h_u_old + size_u_old_p2, size_u_old / 2,
+  cudaMemcpy(d1_u_old, h_u_old + size_p2, size / 2,
              cudaMemcpyHostToDevice);
   double time_IO_1 = omp_get_wtime() - time_tmp;
 
@@ -163,9 +163,9 @@ int main(int argc, char *argv[]) {
   // Copy memory host -> device
   time_tmp = omp_get_wtime();
   cudaSetDevice(device0);
-  cudaMemcpy(h_u_new, d0_u_new, size_u_new / 2, cudaMemcpyDeviceToHost);
+  cudaMemcpy(h_u_new, d0_u_new, size / 2, cudaMemcpyDeviceToHost);
   cudaSetDevice(device1);
-  cudaMemcpy(h_u_new + size_u_new_p2, d1_u_new, size_u_new / 2,
+  cudaMemcpy(h_u_new + size_p2, d1_u_new, size / 2,
              cudaMemcpyDeviceToHost);
   double time_IO_2 = omp_get_wtime() - time_tmp;
 
@@ -175,7 +175,7 @@ int main(int argc, char *argv[]) {
   double GB = 1.0e-09;
   double flop = kMAX * (double)(N) * (double)(N)*10.0;
   double gflops = (flop / tot_time_compute) * GB;
-  double memory = size_f + size_u_new + size_u_old;
+  double memory = size + size+ size;
   double memoryGBs = memory * GB * (1 / tot_time_compute);
 
   printf("%d\t", N);
@@ -199,3 +199,5 @@ int main(int argc, char *argv[]) {
   cudaFreeHost(h_f), cudaFreeHost(h_u_new), cudaFreeHost(h_u_old);
   // end program
   return (0);
+
+}
