@@ -1,7 +1,7 @@
 #include<stdio.h>
 #include<helper_cuda.h>
 
-#define BLOCK_SIZE 8
+#define BLOCK_SIZE 16
 
 
 // A: stride = k
