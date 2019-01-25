@@ -113,19 +113,16 @@ __host__ void matmult_gpu5(int m, int n, int k, double *h_A, double *h_B,
   dim3 dimGrid(m / dimBlock.x,  n / dimBlock.y);
 
 
-  double time_start_gpu5 = omp_get_wtime();
 
   d_gpu5<<<dimGrid, dimBlock>>>(m, n, k, d_A, d_B, d_C);
 
   cudaDeviceSynchronize();
 
-  double gpu5_time = omp_get_wtime()-time_start_gpu5;
 
   cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
 
   int i, j;
 
-  printf("GPUTime = %f\n", gpu5_time);
 
   cudaFree(d_A);
   cudaFree(d_B);
