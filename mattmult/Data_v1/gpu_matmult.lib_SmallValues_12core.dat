@@ -1,0 +1,15 @@
+     0.094     80.619 # matmult_lib
+     0.375    507.815 # matmult_lib
+     0.844   1570.827 # matmult_lib
+     1.500   3389.751 # matmult_lib
+     2.344   6109.486 # matmult_lib
+     3.375   9196.542 # matmult_lib
+     4.594  13528.593 # matmult_lib
+     6.000  18783.065 # matmult_lib
+     7.594  20721.892 # matmult_lib
+     9.375  25762.600 # matmult_lib
+    13.500  36720.300 # matmult_lib
+    18.375  37907.451 # matmult_lib
+    24.000  46458.299 # matmult_lib
+    30.375  47897.183 # matmult_lib
+    37.500  53566.924 # matmult_lib
