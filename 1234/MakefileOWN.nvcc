@@ -1,0 +1,51 @@
+
+TARGET	= matmat
+OBJS	= main.o datatools.o matmatgpu.o 
+
+
+OPT	= -g -O3
+ISA	=
+PARA	= -fopenmp
+
+XOPTS = -Xptxas=-v -arch=sm_70 -lineinfo
+
+CC	= gcc
+
+CCC	= nvcc
+CXX	= nvcc
+CXXFLAGS= --compiler-options "$(OPT) $(PARA)" $(XOPTS)
+
+CFLAGS	= $(OPT) $(ISA) $(PARA) $(XOPT)
+
+F90C  	= gfortran
+LIBS	=
+
+CUDA_PATH ?= /appl/cuda/10.0
+INCLUDES = -I$(CUDA_PATH)/include -I$(CUDA_PATH)/samples/common/inc
+
+all: $(PNGWRITERLIB) $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) $(LIBS)
+
+$(PNGWRITERLIB):
+	@cd pngwriter/src && $(MAKE) -f Makefile.gnu
+
+.SUFFIXES: .cu
+.cu.o:
+	$(CXX) -o $*.o -c $*.cu $(CXXFLAGS) $(SOFLAGS) $(INCLUDES)
+
+clean:
+	@/bin/rm -f *.o core
+
+realclean: clean
+	@rm -f $(PNGWRITERLIB)
+	@rm -f $(TARGET)
+
+
+# dependencies
+#
+
+main.o  : main.cu matmatgpu.h datatools.h
+matmatgpu.o: matmatgpu.cu
+datatools.o: datatools.cu

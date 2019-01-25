@@ -114,10 +114,14 @@ extern "C" { __host__ void matmult_gpu4(int m, int n, int k, double *h_A, double
    //int gridy = (n/blocky)+1;
    dim3 dimGrid(gridx,gridy,1);
 
-   gpu4_column<<<dimGrid,dimBlock>>>(m,n,k,d_A,d_B,d_C);
-   //gpu4_row<<<dimGrid,dimBlock>>>(m,n,k,d_A,d_B,d_C);
+   double time_start_gpu4 = omp_get_wtime();
+   //gpu4_column<<<dimGrid,dimBlock>>>(m,n,k,d_A,d_B,d_C);
+   gpu4_row<<<dimGrid,dimBlock>>>(m,n,k,d_A,d_B,d_C);
 
    cudaDeviceSynchronize();
+
+   double gpu4_time = omp_get_wtime()-time_start_gpu4;
+
    cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
    /*
    printf("\n");
@@ -142,6 +146,8 @@ extern "C" { __host__ void matmult_gpu4(int m, int n, int k, double *h_A, double
       printf("\n");
    }
 */
+
+  printf("GPUTime = %f\n", gpu4_time);
 
    cudaFree(d_A);
    cudaFree(d_B);
