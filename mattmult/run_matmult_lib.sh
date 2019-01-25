@@ -4,7 +4,7 @@ EXPNAME="gpu_matmult"
 #BSUB -q hpcintrogpu
 #BSUB -gpu "num=1:mode=exclusive_process:mps=yes"
 #BSUB -W 24:00
-#BSUB -R "span[hosts=1]"
+#BSUB -n 12 -R "span[hosts=1]"
 #BSUB -R "rusage[mem=2GB]"
 #BSUB -B -N
 #BSUB -M 3GB
@@ -22,7 +22,7 @@ for TTT in $TYPE
 do
 for values in $NMK
 do
-   MATMULT_COMPARE=0 ./matmult_f_v2.nvcc $TTT $values $values $values | grep -v CPU >> Data/$EXPNAME.$TTT.$LOGEXT
+  MATMULT_COMPARE=0 OMP_NUM_THREADS=12 numactl --cpunodebind=0 ./matmult_f_v2.nvcc $TTT $values $values $values | grep -v CPU >> Data/$EXPNAME.$TTT.$LOGEXT
 done
 done
 
