@@ -22,6 +22,6 @@ void matmult_lib(int m, int n, int k, double *A, double *B, double *C) {
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
   double lib_time = omp_get_wtime()-time_start_lib;
 
-  printf("CPUTime = %f\n", lib_time);
+//  printf("CPUTime = %f\n", lib_time);
 }
 }
