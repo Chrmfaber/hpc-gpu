@@ -1,6 +1,8 @@
 #define ELEMS 32
 #include <omp.h>
+
 #include<stdio.h>
+
 
 __global__ void gpu4_row(int m, int n, int k_max, double *A, double *B, double *C) {
 
@@ -118,16 +120,40 @@ extern "C" { __host__ void matmult_gpu4(int m, int n, int k, double *h_A, double
 
    double time_start_gpu4 = omp_get_wtime();
    gpu4_column<<<dimGrid,dimBlock>>>(m,n,k,d_A,d_B,d_C);
-   //gpu4_row<<<dimGrid,dimBlock>>>(m,n,k,d_A,d_B,d_C);
+
+   // gpu4_row<<<dimGrid,dimBlock>>>(m,n,k,d_A,d_B,d_C);
+
 
    cudaDeviceSynchronize();
 
    double gpu4_time = omp_get_wtime()-time_start_gpu4;
 
    cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
+   /*
+   printf("\n");
+   for(i = 0;i < m; i++){
+      for(j = 0;j < k; j++){
+         printf("%f ", h_A[i*k+j]);
+      }
+      printf("\n");
+   }
+   printf("\n");
+   for(i = 0;i < k; i++){
+      for(j = 0;j < n; j++){
+         printf("%f ", h_B[i*k+j]);
+      }
+      printf("\n");
+   }
+   printf("\n");
+   for(i = 0;i < m; i++){
+      for(j = 0;j < n; j++){
+         printf("%f ", h_C[i*k+j]);
+      }
+      printf("\n");
+   }
+*/
 
-
-  //printf("GPUTime = %f\n", gpu4_time);
+  // printf("GPUTime = %f\n", gpu4_time);
 
    cudaFree(d_A);
    cudaFree(d_B);

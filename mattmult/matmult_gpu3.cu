@@ -1,4 +1,5 @@
 #include <stdio.h>
+
 #include <omp.h>
 __global__ void gpu3_row(int m, int n, int k_max, double *A, double *B, double *C) {
 
@@ -25,6 +26,7 @@ __global__ void gpu3_row(int m, int n, int k_max, double *A, double *B, double *
          C[i*n+j] = sum1;
       }
 }
+
 __global__ void gpu3_column(int m, int n, int k_max, double *A, double *B, double *C) {
 
     int i, j, k;
@@ -40,7 +42,7 @@ __global__ void gpu3_column(int m, int n, int k_max, double *A, double *B, doubl
             sum1 += A[i*k_max+k] * B[k*n+j];
             sum2 += A[i*k_max+k] * B[k*n+(j+1)];
          }
-         printf("%f %f\n", sum1, sum2);
+         // printf("%f %f\n", sum1, sum2);
          C[i*n+j] = sum1;
          C[i*n+(j+1)] = sum2;
       }else if(!(i >= m || j >= n)){
@@ -50,7 +52,7 @@ __global__ void gpu3_column(int m, int n, int k_max, double *A, double *B, doubl
               sum1 += A[i*k_max+k] * B[k*n+j];
               //sum2 += A[i*k_max+k] * B[k*n+(j+1)];
            }
-           printf("%f\n", sum1);
+           // printf("%f\n", sum1);
            C[i*n+j] = sum1;
            //C[i*n+(j+1)] = sum2;
         }
@@ -100,27 +102,6 @@ extern "C" { __host__ void matmult_gpu3(int m, int n, int k, double *h_A, double
    cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
 
    int i,j;
-   printf("\n");
-   for(i = 0;i < m; i++){
-      for(j = 0;j < k; j++){
-         printf("%f ", h_A[i*k+j]);
-      }
-      printf("\n");
-   }
-   printf("\n");
-   for(i = 0;i < k; i++){
-      for(j = 0;j < n; j++){
-         printf("%f ", h_B[i*n+j]);
-      }
-      printf("\n");
-   }
-   printf("\n");
-   for(i = 0;i < m; i++){
-      for(j = 0;j < n; j++){
-         printf("%f ", h_C[i*n+j]);
-      }
-      printf("\n");
-   }
 
 
    cudaFree(d_A);

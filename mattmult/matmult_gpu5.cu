@@ -2,7 +2,7 @@
 #include<helper_cuda.h>
 #include <omp.h>
 
-#define BLOCK_SIZE 8
+#define BLOCK_SIZE 16
 
 
 // A: stride = k
