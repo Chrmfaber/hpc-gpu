@@ -1,29 +1,29 @@
 #include <stdio.h>
-__global__ void gpu3_row(int m, int n, int k_max, double *A, double *B, double *C) {
-
-    int i, j, k;
-    double sum1, sum2;
-
-    i = 2*(blockIdx.x * blockDim.x + threadIdx.x);
-    j = blockIdx.y * blockDim.y + threadIdx.y;
-
-    if(!(i >= m-1 || j >= n)){
-         sum1 = 0.0;
-         sum2 = 0.0;
-         for(k = 0; k < k_max; k++){
-            sum1 += A[i*k_max+k] * B[k*n+j];
-            sum2 += A[(i+1)*k_max+k] * B[k*n+j];
-         }
-         C[i*n+j] = sum1;
-         C[(i+1)*n+j] = sum2;
-      }else if(!(i >= m || j >= n)){
-         sum1 = 0.0;
-         for(k = 0; k < k_max; k++){
-            sum1 += A[i*k_max+k] * B[k*n+j];
-         }
-         C[i*n+j] = sum1;
-      }
-}
+// __global__ void gpu3_row(int m, int n, int k_max, double *A, double *B, double *C) {
+//
+//    int i, j, k;
+//    double sum1, sum2;
+//
+//    i = 2*(blockIdx.x * blockDim.x + threadIdx.x);
+//    j = blockIdx.y * blockDim.y + threadIdx.y;
+//
+//   if(!(i >= m-1 || j >= n)){
+//         sum1 = 0.0;
+//         sum2 = 0.0;
+//         for(k = 0; k < k_max; k++){
+//            sum1 += A[i*k_max+k] * B[k*n+j];
+//            sum2 += A[(i+1)*k_max+k] * B[k*n+j];
+//         }
+//         C[i*n+j] = sum1;
+//         C[(i+1)*n+j] = sum2;
+//      }else if(!(i >= m || j >= n)){
+//         sum1 = 0.0;
+//         for(k = 0; k < k_max; k++){
+//            sum1 += A[i*k_max+k] * B[k*n+j];
+//         }
+//         C[i*n+j] = sum1;
+//      }
+//}
 __global__ void gpu3_column(int m, int n, int k_max, double *A, double *B, double *C) {
 
     int i, j, k;
@@ -99,27 +99,6 @@ extern "C" { __host__ void matmult_gpu3(int m, int n, int k, double *h_A, double
    cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
 
    int i,j;
-   printf("\n");
-   for(i = 0;i < m; i++){
-      for(j = 0;j < k; j++){
-         printf("%f ", h_A[i*k+j]);
-      }
-      printf("\n");
-   }
-   printf("\n");
-   for(i = 0;i < k; i++){
-      for(j = 0;j < n; j++){
-         printf("%f ", h_B[i*n+j]);
-      }
-      printf("\n");
-   }
-   printf("\n");
-   for(i = 0;i < m; i++){
-      for(j = 0;j < n; j++){
-         printf("%f ", h_C[i*n+j]);
-      }
-      printf("\n");
-   }
 
 
    cudaFree(d_A);

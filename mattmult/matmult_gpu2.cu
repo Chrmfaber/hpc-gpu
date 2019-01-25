@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <omp.h>
+
 __global__ void gpu2(int m, int n, int k_max, double *A, double *B, double *C) {
 
     int i, j, k;

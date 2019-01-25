@@ -1,4 +1,5 @@
 #define ELEMS 32
+#include <omp.h>
 
 __global__ void gpu4_row(int m, int n, int k_max, double *A, double *B, double *C) {
 
@@ -115,8 +116,8 @@ extern "C" { __host__ void matmult_gpu4(int m, int n, int k, double *h_A, double
    dim3 dimGrid(gridx,gridy,1);
 
    double time_start_gpu4 = omp_get_wtime();
-   //gpu4_column<<<dimGrid,dimBlock>>>(m,n,k,d_A,d_B,d_C);
-   gpu4_row<<<dimGrid,dimBlock>>>(m,n,k,d_A,d_B,d_C);
+   gpu4_column<<<dimGrid,dimBlock>>>(m,n,k,d_A,d_B,d_C);
+   // gpu4_row<<<dimGrid,dimBlock>>>(m,n,k,d_A,d_B,d_C);
 
    cudaDeviceSynchronize();
 
@@ -147,7 +148,7 @@ extern "C" { __host__ void matmult_gpu4(int m, int n, int k, double *h_A, double
    }
 */
 
-  printf("GPUTime = %f\n", gpu4_time);
+  // printf("GPUTime = %f\n", gpu4_time);
 
    cudaFree(d_A);
    cudaFree(d_B);
