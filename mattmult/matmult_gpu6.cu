@@ -1,273 +1,135 @@
-#define ELEMS 32
+#include <helper_cuda.h>
 #include <omp.h>
+#include <stdio.h>
 
-#include<stdio.h>
+#define BLOCK_SIZE 16
 
+// A: stride = k
+// B: stride = n
+// C: stride = n
 
-__global__ void gpu6_row(int m, int n, int k_max, double *A, double *B, double *C) {
-    int i, j, k, l;
-    double sum[ELEMS];
+// Get a matrix element
+// __device__ double GetElement(double *A, int row, int col, int stride) {
+  // printf("Index at = %d \n", row * stride + col);
+ // return A[row * stride + col];
+// }
 
-    i = ELEMS*(blockIdx.x * blockDim.x + threadIdx.x);
-    j = blockIdx.y * blockDim.y + threadIdx.y;
+// Set a matrix element
+// __device__ void SetElement(double *A, int row, int col, int stride,
+ //                          double value) {
+//  A[row * stride + col] = value;
+//}
 
-    if(!(i+ELEMS >= m || j >= n)){
-         for(l = 0; l < ELEMS; l++){
-            sum[l] = 0.0;
-         }
-         for(k = 0; k < k_max; k++){
-            for(l = 0; l < ELEMS; l++){
-               sum[l] += A[(i+l)*k_max+k] * B[k*n+j];
-            }
-         }
-         for(l = 0; l < ELEMS; l++){
-            C[(i+l)*n+j] = sum[l];
-         }
-   }else if(!(i >= m || j >= n)){ //THIS IS CLEANUP IF ELEMS DOES NOT DIVIDE INTO DIMENSIONS
-      for(l = 0; i+l < m && l < ELEMS; l++){
-         sum[l] = 0.0;
-      }
-      for(k = 0; k < k_max; k++){
-         for(l = 0; i+l < m && l < ELEMS; l++){
-            sum[l] += A[(i+l)*k_max+k] * B[k*n+j];
-         }
-      }
-      for(l = 0; i+l < m && l < ELEMS; l++){
-         C[(i+l)*n+j] = sum[l];
-      }
-   }
+// Get the BLOCK_SIZExBLOCK_SIZE sub-matrix Asub of A that is
+// located col sub-matrices to the right and row sub-matrices down
+// from the upper-left corner of A
+//__device__ void GetSubMatrix(double *A, double **Asub, int row, int col,
+//                             int stride) {
+//  *Asub = &A[stride * BLOCK_SIZE * row + BLOCK_SIZE * col];
+// }
+
+__global__ void d_gpu6(int m, int n, int k, double *A, double *B, double *C) {
+
+  int i, e;
+  double sum;
+
+  // Block row and column
+  int blockRow = blockIdx.y;
+  int blockCol = blockIdx.x;
+
+  // Each thread block computes one sub-matrix Csub of C
+  double *Csub = &C[n * BLOCK_SIZE * blockRow + BLOCK_SIZE * blockCol];
+  // GetSubMatrix(C, &Csub, blockRow, blockCol, n);
+
+  // Each thread computes one element of Csub
+  // by accumulating results into Cvalue
+  double Cvalue = 0;
+
+  // Thread row and column within Csub
+  int row = threadIdx.y;
+  int col = threadIdx.x;
+
+  for (i = 0; i < (k / BLOCK_SIZE); ++i) {
+    //  Example: *Asub = &A[stride * BLOCK_SIZE * row + BLOCK_SIZE * col];
+    double *Asub = &A[k * BLOCK_SIZE * blockRow + BLOCK_SIZE * i];
+    double *Bsub = &B[n * BLOCK_SIZE * i + BLOCK_SIZE * blockCol];
+    // Get sub-matrix Asub of A
+
+    // GetSubMatrix(A, &Asub, blockRow, i, k);
+
+    // Get sub-matrix Bsub of B
+    // GetSubMatrix(B, &Bsub, i, blockCol, n);
+
+    // Shared memory used to store Asub and Bsub respectively
+    __shared__ double As[BLOCK_SIZE][BLOCK_SIZE];
+    __shared__ double Bs[BLOCK_SIZE][BLOCK_SIZE];
+
+    // Load Asub and Bsub from device memory to shared memory
+    // Each thread loads one element of each sub-matrix
+
+    As[row][col] = Asub[row * k + col];
+    Bs[row][col] = Bsub[row * n + col];
+
+    // Synchronize to make sure the sub-matrices are loaded
+    // before starting the computation
+    __syncthreads();
+    // Multiply Asub and Bsub together
+    for (e = 0; e < BLOCK_SIZE; ++e) {
+      Cvalue += As[row][e] * Bs[e][col];
+    }
+
+    // Synchronize to make sure that the preceding
+    // computation is done before loading two new
+    // sub-matrices of A and B in the next iteration
+    __syncthreads();
+  }
+
+  // Write Csub to device memory
+  // Each thread writes one element
+  Csub[row * n + col] = Cvalue;
 }
 
-__global__ void gpu6_column(int m, int n, int k_max, double *A, double *B, double *C) {
+extern "C" {
+__host__ void matmult_gpu6(int m, int n, int k, double *h_A, double *h_B,
+                           double *h_C) {
+  double *d_A, *d_B, *d_C;
 
-    int i, j, k, l;
-    double sum[ELEMS];
+  cudaSetDevice(1);
 
-    i = blockIdx.x * blockDim.x + threadIdx.x;
-    j = ELEMS*(blockIdx.y * blockDim.y + threadIdx.y);
+  int size_A = m * k * sizeof(double);
+  int size_B = k * n * sizeof(double);
+  int size_C = m * n * sizeof(double);
 
-    if(!(i >= m || j+ELEMS >= n)){
-      for(l = 0; l < ELEMS; l++){
-          sum[l] = 0.0;
-      }
-      for(k = 0; k < k_max; k++){
-         for(l = 0; l < ELEMS; l++){
-            sum[l] += A[i*k_max+k] * B[k*n+(j+l)];
-         }
-      }
-      for(l = 0; l < ELEMS; l++){
-         C[i*n+(j+l)] = sum[l];
-      }
-      }else if(!(i >= m || j >= n)){
-         for(l = 0; j+l < n && l < ELEMS; l++){
-             sum[l] = 0.0;
-         }
-         for(k = 0; k < k_max; k++){
-            for(l = 0; j+l < n && l < ELEMS; l++){
-               sum[l] += A[i*k_max+k] * B[k*n+(j+l)];
-            }
-         }
-         for(l = 0; j+l < n && l < ELEMS; l++){
-            C[i*n+(j+l)] = sum[l];
-         }
-      }
+  cudaHostRegister(h_A, size_A, cudaHostRegisterPortable);
+  cudaHostRegister(h_B, size_B, cudaHostRegisterPortable);
+  cudaHostRegister(h_C, size_C, cudaHostRegisterPortable);
+
+
+  cudaMalloc((void **)&d_A, size_A);
+  cudaMalloc((void **)&d_B, size_B);
+  cudaMalloc((void **)&d_C, size_C);
+
+  cudaMemcpy(d_A, h_A, size_A, cudaMemcpyHostToDevice);
+  cudaMemcpy(d_B, h_B, size_B, cudaMemcpyHostToDevice);
+
+  dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
+  dim3 dimGrid(m / dimBlock.x, n / dimBlock.y);
+
+
+  d_gpu6<<<dimGrid, dimBlock>>>(m, n, k, d_A, d_B, d_C);
+
+  cudaDeviceSynchronize();
+  
+
+
+  cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
+
+  int i, j; 
+
+
+
+  cudaFree(d_A);
+  cudaFree(d_B);
+  cudaFree(d_C);
 }
-
-extern "C" { __host__ void matmult_gpu6(int m, int n, int k, double *h_A, double *h_B, double *h_C){
-   double *d_A, *d_B, *d_C;
-
-   int devices;
-   cudaGetDeviceCount(&devices);
-
-   int A_elems = m*k;
-   int B_elems = k*n;
-   int C_elems = m*n;
-
-   int size_A = A_elems*sizeof(double);
-   int size_B = B_elems*sizeof(double);
-   int size_C = C_elems*sizeof(double);
-
-   cudaMalloc((void**)&d_A, size_A);
-   cudaMalloc((void**)&d_B, size_B);
-   cudaMalloc((void**)&d_C, size_C);
-
-   cudaMemcpy(d_A, h_A, size_A, cudaMemcpyHostToDevice);
-   cudaMemcpy(d_B, h_B, size_B, cudaMemcpyHostToDevice);
-
-   int blockx = 16;
-   int blocky = 16;
-   dim3 dimBlock(blockx,blocky,1);
-
-   //Grid for column algorithm
-   int gridx = (m/blockx)+1;
-   int gridy = ((n/blocky)+1)/ELEMS + 1;
-
-   //Grid for row algorithm
-   //int gridx = ((m/blockx)+1)/ELEMS + 1;
-   //int gridy = (n/blocky)+1;
-   dim3 dimGrid(gridx,gridy,1);
-   gpu6_column<<<dimGrid,dimBlock>>>(m,n,k,d_A,d_B,d_C);
-
-   // gpu4_row<<<dimGrid,dimBlock>>>(m,n,k,d_A,d_B,d_C);
-
-
-   cudaDeviceSynchronize();
-
-   cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
-   /*
-   printf("\n");
-   for(i = 0;i < m; i++){
-      for(j = 0;j < k; j++){
-         printf("%f ", h_A[i*k+j]);
-      }
-      printf("\n");
-   }
-   printf("\n");
-   for(i = 0;i < k; i++){
-      for(j = 0;j < n; j++){
-         printf("%f ", h_B[i*k+j]);
-      }
-      printf("\n");
-   }
-   printf("\n");
-   for(i = 0;i < m; i++){
-      for(j = 0;j < n; j++){
-         printf("%f ", h_C[i*k+j]);
-      }
-      printf("\n");
-   }
-*/
-
-  // printf("GPUTime = %f\n", gpu4_time);
-
-   cudaFree(d_A);
-   cudaFree(d_B);
-   cudaFree(d_C);
-   }
 }
-
-/*
-#define ELEMS 40
-#include <omp.h>
-
-#include<stdio.h>
-
-__global__ void gpu6_column(int m, int n, int k_max, double *A, double *B, double *C) {
-
-    int i, j, k, l;
-    double sum[ELEMS];
-
-    i = blockIdx.x * blockDim.x + threadIdx.x;
-    j = ELEMS*(blockIdx.y * blockDim.y + threadIdx.y);
-
-    if(!(i >= m || j >= n)){
-      for(l = 0; j+l < n && l < ELEMS; l++){
-          sum[l] = 0.0;
-      }
-      for(k = 0; k < k_max; k++){
-         for(l = 0; j+l < n && l < ELEMS; l++){
-            sum[l] += A[i*k_max+k] * B[k*n+(j+l)];
-         }
-      }
-      for(l = 0; j+l < n && l < ELEMS; l++){
-         C[i*n+(j+l)] = sum[l];
-      }
-   }
-      /*
-      else if(!(i >= m || j >= n)){
-         for(l = 0; j+l < n && l < ELEMS; l++){
-             sum[l] = 0.0;
-         }
-         for(k = 0; k < k_max; k++){
-            for(l = 0; j+l < n && l < ELEMS; l++){
-               sum[l] += A[i*k_max+k] * B[k*n+(j+l)];
-            }
-         }
-         for(l = 0; j+l < n && l < ELEMS; l++){
-            C[i*n+(j+l)] = sum[l];
-         }
-      }
-
-}
-*/
-/*
-extern "C" { __host__ void matmult_gpu6(int m, int n, int k, double *h_A, double *h_B, double *h_C){
-   double *d_A, *d_B, *d_C;
-
-   int devices;
-   cudaGetDeviceCount(&devices);
-
-
-   int A_elems = m*k;
-   int B_elems = k*n;
-   int C_elems = m*n;
-
-   int size_A = A_elems*sizeof(double);
-   int size_B = B_elems*sizeof(double);
-   int size_C = C_elems*sizeof(double);
-
-
-
-   cudaMalloc((void**)&d_A, size_A);
-   cudaMalloc((void**)&d_B, size_B);
-   cudaMalloc((void**)&d_C, size_C);
-
-   cudaMemcpy(d_A, h_A, size_A, cudaMemcpyHostToDevice);
-   cudaMemcpy(d_B, h_B, size_B, cudaMemcpyHostToDevice);
-
-   int blockx = 16;
-   int blocky = 16;
-   dim3 dimBlock(blockx,blocky,1);
-
-   //Grid for column algorithm
-   int gridx = (m/blockx)+1;
-   int gridy = ((n/blocky)+1)/ELEMS + 1;
-
-   //Grid for row algorithm
-   //int gridx = ((m/blockx)+1)/ELEMS + 1;
-   //int gridy = (n/blocky)+1;
-   dim3 dimGrid(gridx,gridy,1);
-
-   //double time_start_gpu4 = omp_get_wtime();
-   gpu6_column<<<dimGrid,dimBlock>>>(m,n,k,d_A,d_B,d_C);
-
-   // gpu4_row<<<dimGrid,dimBlock>>>(m,n,k,d_A,d_B,d_C);
-
-
-   cudaDeviceSynchronize();
-
-   //double gpu4_time = omp_get_wtime()-time_start_gpu4;
-
-   cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
-   /*
-   printf("\n");
-   for(i = 0;i < m; i++){
-      for(j = 0;j < k; j++){
-         printf("%f ", h_A[i*k+j]);
-      }
-      printf("\n");
-   }
-   printf("\n");
-   for(i = 0;i < k; i++){
-      for(j = 0;j < n; j++){
-         printf("%f ", h_B[i*k+j]);
-      }
-      printf("\n");
-   }
-   printf("\n");
-   for(i = 0;i < m; i++){
-      for(j = 0;j < n; j++){
-         printf("%f ", h_C[i*k+j]);
-      }
-      printf("\n");
-   }
-
-
-  // printf("GPUTime = %f\n", gpu4_time);
-
-   cudaFree(d_A);
-   cudaFree(d_B);
-   cudaFree(d_C);
-   }
-}
-*/
